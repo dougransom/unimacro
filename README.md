@@ -8,6 +8,7 @@ Unimacro is reasonably stable, but still in alpha.  Check the [Unimacro Issues](
 areas - probably nothing you can't live without.
 
 
+
 ## Install a prerelease of [Python for Win 32](https://github.com/mhammond/pywin32) 
 The latest the version of [Python for Win 32](https://github.com/mhammond/pywin32)  in the Python Packing Index (300) has some bugs that affect Unimacro.
 So you need to install a later version.
@@ -18,7 +19,6 @@ In a shell with administrator privileges,
 `pip install --force-reinstall .\pywin32-300.1-cp38-cp38-win32.whl`.
 
 ## Install unimacro
-
 
 Install from the [Test Python Package Index](https://test.pypi.org/)
 with the following.
