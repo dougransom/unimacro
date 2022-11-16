@@ -1,0 +1,24 @@
+
+_brackets.py
+_calculator.py
+_clickbyvoice.py
+_debug_natlink.py
+_folders.py
+_general.py
+_keystrokes.py
+_latex.py
+_lines.py
+_number extended.py
+_number simple.py
+_oops.py
+_repeat.py
+_tags.py
+_tasks.py
+_testtrayicon.py
+_unimacrotest.py
+excel.py
+foldersrememberdialog.py
+frescobaldi.py
+solitaire.py
+winword_variable.py
+

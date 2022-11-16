@@ -24,6 +24,9 @@ from dtactions.unimacro import unimacroutils
 from dtactions.unimacro import unimacroactions as actions
 
 from unimacro import natlinkutilsbj as natbj
+import unimacro.UnimacroGrammars as suppliedGrammars
+#this is where we can look for UnimacroGrammars supplied with the Unimacro package.
+suppliedGrammarsSearchLocations=suppliedGrammars.__spec__.submodule_search_locations
 
 status = natlinkstatus.NatlinkStatus()
 natlinkmain = loader.NatlinkMain()
@@ -634,7 +637,9 @@ class UtilGrammar(ancestor):
         wrongNames = set() #set(natlinkmain.wrongFiles.keys())
         loadedNames = set() #set(natlinkmain.loadedFiles.keys())
 
+
         grammarsDirectory = status.getUnimacroGrammarsDirectory()
+        grammarsDirectory = suppliedGrammarsSearchLocations
         unimacroPyFiles = [f for f in os.listdir(grammarsDirectory) if f.endswith('.py')]
         # print("\n===unimacroPyFiles", unimacroPyFiles)
         # print(f'wrongNames" {wrongNames}')
