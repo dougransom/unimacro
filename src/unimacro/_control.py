@@ -633,7 +633,7 @@ class UtilGrammar(ancestor):
             self.setList('gramnames', list(newSet))
 
     def getUnimacroGrammarNames(self):
-        ep=getUnimacroGrammarEntryPoints()
+        ep=self.getUnimacroGrammarEntryPoints()
         #unzip ep, grab the names as the first column, covert to a list.
         names = list(list(zip(*ep))[0])
         return names
