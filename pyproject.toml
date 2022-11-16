@@ -37,6 +37,7 @@ test = [
 dev = [
 	"pyenvutils",
 	"flit",
+	"pytest >= 7.1.2"
 ]
 [tool.pytest.ini_options]
 minversion = "7.1.2"

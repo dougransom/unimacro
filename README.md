@@ -29,7 +29,7 @@ More about [Unimacro Grammars](https://qh.antenna.nl/unimacro/grammars/globalgra
 # Developer instructions.
 
 If you want to install your local unimacro development environment as the working unimacro:
-`pip install -e . `.  
+`pip install -e .[dev] `.    The [dev] option brings in the development tools
 
 `flit build` to build the wheen and sdist with [flit](https://flit.pypa.io/).  
 `flit publish` to pubish them to the [Python Package Index](https://pypi.org/).
