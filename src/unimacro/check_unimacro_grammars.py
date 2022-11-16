@@ -18,6 +18,9 @@ if not os.path.isfile(k3diffapp):
     k3diffapp = None
 
 status = natlinkstatus.NatlinkStatus()
+
+
+#delete these three lines and  anything that calls them.
 sitePackagesDir = get_site_packages_dir(__file__).lower()
 workDir = str(Path(sitePackagesDir).resolve())
 have_symlinks = (workDir != sitePackagesDir)

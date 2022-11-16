@@ -58,6 +58,7 @@ def findInSitePackages(cloneDir):
         return cloneDir
     commonpart = cloneDir.split('\\src\\')[-1]
     spDir = os.path.join(sys.prefix, 'Lib', 'site-packages', commonpart)
+    # this package can be installed with flit --symlink or pipe -e
     if os.path.isdir(spDir):
         spResolve = os.path.realpath(spDir)
         if spResolve == spDir:
