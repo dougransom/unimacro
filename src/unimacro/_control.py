@@ -133,6 +133,7 @@ class UtilGrammar(ancestor):
         natbj.RegisterControlObject(self)
         self.emptyList('message')
         allGramNames = self.getUnimacroGrammarNames()
+        print(f"Unimacro Grammar names {allGramNames}")
         self.setList('gramnames', allGramNames)
         self.setNumbersList('tracecount', tracecount)
         
