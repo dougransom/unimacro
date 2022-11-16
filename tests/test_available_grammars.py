@@ -1,4 +1,5 @@
 import pytest
+from importlib.metadata import entry_points
 
 #@pytest.fixture
 def expected_supplied_grammars():
@@ -14,5 +15,14 @@ def test_supplied_grammars_list():
         supplied_grammars = list(filter( lambda x: len(x)!=0, [line.rstrip() for line in supplied_grammars_file]))
         print(f"Supplied grammars {supplied_grammars}")
 
-print(f"expcted {expected_supplied_grammars()}")
+@pytest.fixture
+def advertised_grammars():
+    discovered_grammars = entry_points(group="UnimacroGrammar")    
+
+def test_advertised_grammars_load(advertised_grammars):
+    pass
+#print(f"expcted {expected_supplied_grammars()}")
  
+
+discovered_grammars = entry_points(group="UnimacroGrammar")
+print(f"Discovered grammars {discovered_grammars}")
