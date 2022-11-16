@@ -15,6 +15,7 @@
 import os
 import filecmp
 import shutil
+from importlib.metadata import entry_points
 import string
 import natlink
 from natlinkcore import loader
@@ -630,16 +631,25 @@ class UtilGrammar(ancestor):
         if prevSet != newSet:
             print(f'setting new grammar names list: {list(newSet)}')
             self.setList('gramnames', list(newSet))
-            
+
     def getUnimacroGrammarNames(self):
-        """get all the names of active or wrong Unimacro grammar names
+        ep=getUnimacroGrammarEntryPoints()
+        #unzip ep, grab the names as the first column, covert to a list.
+        names = list(list(zip(*ep))[0])
+        return names
+
+    def getUnimacroGrammarEntryPoints(self):
+        """get all the registered  Unimacro grammar entry points
         """
         wrongNames = set() #set(natlinkmain.wrongFiles.keys())
         loadedNames = set() #set(natlinkmain.loadedFiles.keys())
 
+        discovered_grammars = entry_points(group="UnimacroGrammar")
+        return discovered_grammars
+
+        #TODO delete the rest of this function.
 
         grammarsDirectory = status.getUnimacroGrammarsDirectory()
-        grammarsDirectory = suppliedGrammarsSearchLocations
         unimacroPyFiles = [f for f in os.listdir(grammarsDirectory) if f.endswith('.py')]
         # print("\n===unimacroPyFiles", unimacroPyFiles)
         # print(f'wrongNames" {wrongNames}')
