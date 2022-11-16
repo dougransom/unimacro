@@ -24,7 +24,6 @@ from dtactions.unimacro import unimacroutils
 from dtactions.unimacro import unimacroactions as actions
 
 from unimacro import natlinkutilsbj as natbj
-from unimacro import check_unimacro_grammars
 
 status = natlinkstatus.NatlinkStatus()
 natlinkmain = loader.NatlinkMain()
@@ -648,8 +647,7 @@ class UtilGrammar(ancestor):
         
         sync with ...
         """
-        # print('checkUnimacroGrammars!!')
-        check_unimacro_grammars.checkUnimacroGrammars()
+        print('checkUnimacroGrammars, does nothing!!')
 
 # class MessageDictGrammar(natlinkutils.DictGramBase):
 #     def __init__(self):
@@ -709,6 +707,12 @@ def checkOriginalFileWithActualTxtPy(name, org_path, txt_path, py_path):
     py_path:  actual state of active grammar, noted if changes are made
     
     """
+    print(f"Warning checkOrignialFileWithActualTxpPy called {name} {org_path} {txt_path} {py_path}")
+    return
+
+    #this function to be removed.
+
+    
     isfile = os.path.isfile
     if not isfile(txt_path):
         shutil.copyfile(org_path, txt_path)
