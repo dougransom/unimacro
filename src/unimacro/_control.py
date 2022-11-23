@@ -13,6 +13,7 @@
 #pylint:disable=E1101
 
 import os
+from pathlib import Path
 import filecmp
 import shutil
 from importlib.metadata import entry_points
@@ -640,7 +641,8 @@ class UtilGrammar(ancestor):
         return names
 
     def getUnimacroGrammarEntryPoints(self):
-        """get all the registered  Unimacro grammar entry points
+        """get all the Unimacro Grammars (modules) registered as entry points
+        which are importable python modules (no object references in the entrypoint)
         """
         wrongNames = set() #set(natlinkmain.wrongFiles.keys())
         loadedNames = set() #set(natlinkmain.loadedFiles.keys())
@@ -658,12 +660,26 @@ class UtilGrammar(ancestor):
         loadedandwrongmodules = [n[:-3] for n in unimacroPyFiles if n in wrongNames.union(loadedNames)]
         return loadedandwrongmodules
 
+
     def checkUnimacroGrammars(self):
         """see if there are any changed grammar files with respect to original file in release
         
         sync with ...
+        https://docs.python.org/3/library/importlib.metadata.html#entry-points
         """
-        print('checkUnimacroGrammars, does nothing!!')
+        print('checkUnimacroGrammars')
+        entry_points=self.getUnimacroGrammarEntryPoints()
+        for ep in entry_points:
+            py_file_name=f"{ep.name}.py"
+            py_file_value=f"""from unimacro import load_unimacro_entry_point
+load_unimacro_entry_point('{ep.name}')"""
+            file_to_open=Path(status.getUnimacroGrammarsDirectory())/py_file_name
+            with open(file_to_open,'w',encoding='utf-8') as f:
+                f.write(py_file_value)
+
+
+
+
 
 # class MessageDictGrammar(natlinkutils.DictGramBase):
 #     def __init__(self):

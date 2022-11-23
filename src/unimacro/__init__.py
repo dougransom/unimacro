@@ -22,7 +22,7 @@ sitePackagesDir = get_site_packages_dir(__file__)
 """
 import os
 import sys
-
+from importlib.metadata import entry_points
 __version__ = '4.1.3'   
  
 def get_site_packages_dir(fileOfModule):
@@ -71,4 +71,16 @@ def findInSitePackages(cloneDir):
     else:
         print('findInSitePackages, not a valid directory in site-packages, no "flit install --symlink" yet: {spDir}')
     return cloneDir        
-                      
+
+def load_unimacro_entry_point(ep_name):                 
+    ep_group='UnimacroGrammar'
+    try:
+        (grammar,)=entry_points(group=ep_group,name=ep_name)
+        print(f"Attempting to load {grammar}")
+        rv=grammar.load()
+        print(f"Loaded {grammar}")
+        return rv
+    except Exception as e:
+        print(f"Failed to load {ep_name} in {__file__},\nException:\n{e}") 
+
+
