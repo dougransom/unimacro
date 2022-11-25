@@ -26,6 +26,8 @@ from dtactions.unimacro import unimacroutils
 from dtactions.unimacro import unimacroactions as actions
 
 from unimacro import natlinkutilsbj as natbj
+from unimacro import check_unimacro_grammars
+
 import unimacro.UnimacroGrammars as suppliedGrammars
 #this is where we can look for UnimacroGrammars supplied with the Unimacro package.
 suppliedGrammarsSearchLocations=suppliedGrammars.__spec__.submodule_search_locations
@@ -635,7 +637,7 @@ class UtilGrammar(ancestor):
             self.setList('gramnames', list(newSet))
 
     def getUnimacroGrammarNames(self):
-        ep=self.getUnimacroGrammarEntryPoints()
+        ep=check_unimacro_grammars.getUnimacroGrammarEntryPoints()
         #unzip ep, grab the names as the first column, covert to a list.
         names = list(list(zip(*ep))[0])
         return names
@@ -648,15 +650,14 @@ class UtilGrammar(ancestor):
         loadedNames = set() #set(natlinkmain.loadedFiles.keys())
 
         discovered_grammars = entry_points(group="UnimacroGrammar")
-        return discovered_grammars
 
-        #TODO delete the rest of this function.
-
+     
         grammarsDirectory = status.getUnimacroGrammarsDirectory()
         unimacroPyFiles = [f for f in os.listdir(grammarsDirectory) if f.endswith('.py')]
-        # print("\n===unimacroPyFiles", unimacroPyFiles)
-        # print(f'wrongNames" {wrongNames}')
-        # print(f'loadedNames" {loadedNames}')
+        print("\n===unimacroPyFiles", unimacroPyFiles)
+        print(f'wrongNames" {wrongNames}')
+        print(f'loadedNames" {loadedNames}')
+        print(f'Discovered Grammars {discovered_grammars}')
         loadedandwrongmodules = [n[:-3] for n in unimacroPyFiles if n in wrongNames.union(loadedNames)]
         return loadedandwrongmodules
 
@@ -665,17 +666,9 @@ class UtilGrammar(ancestor):
         """see if there are any changed grammar files with respect to original file in release
         
         sync with ...
-        https://docs.python.org/3/library/importlib.metadata.html#entry-points
-        """
-        print('checkUnimacroGrammars')
-        entry_points=self.getUnimacroGrammarEntryPoints()
-        for ep in entry_points:
-            py_file_name=f"{ep.name}.py"
-            py_file_value=f"""from unimacro import load_unimacro_entry_point
-load_unimacro_entry_point('{ep.name}')"""
-            file_to_open=Path(status.getUnimacroGrammarsDirectory())/py_file_name
-            with open(file_to_open,'w',encoding='utf-8') as f:
-                f.write(py_file_value)
+                """
+        check_unimacro_grammars.checkUnimacroGrammars()
+
 
 
 

@@ -8,6 +8,8 @@ import difflib
 import subprocess
 from pathlib import Path        
 from natlinkcore import natlinkstatus
+from importlib.metadata import entry_points
+
 try:
     from unimacro.__init__ import get_site_packages_dir
 except ModuleNotFoundError:
@@ -25,8 +27,12 @@ sitePackagesDir = get_site_packages_dir(__file__).lower()
 workDir = str(Path(sitePackagesDir).resolve())
 have_symlinks = (workDir != sitePackagesDir)
     
+def make_script_from_entry_point(name,path)
+    """ Make a script that imports the entry point.
+    """
+    pass
 
-def checkOriginalFileWithActualTxtPy(name, org_path, txt_path, py_path):
+def checkOriginalFileWithActualTxtPy(name,  txt_path, py_path):
     """check if grammar has been copied, and changed, with copy of .txt as intermediate
     
     org_path: path to python file in UnimacroGrammars, the original grammars
@@ -36,8 +42,9 @@ def checkOriginalFileWithActualTxtPy(name, org_path, txt_path, py_path):
     """
     isfile = os.path.isfile
     if not isfile(txt_path):
-        shutil.copyfile(org_path, txt_path)
-    org_txt_equal = not bool( get_diff(org_path, txt_path) )
+        make_script_from_entry_point(name,txt_path)
+    # old check for update   
+    #org_txt_equal = not bool( get_diff(org_path, txt_path) )
     
     if not isfile(py_path):
         if not org_txt_equal:
@@ -124,27 +131,55 @@ def cleanup_files(activedir):
     for f in cleanupFiles:
         os.remove(os.path.join(activedir, f))
 
+def getUnimacroGrammarEntryPoints():
+    """get all the Unimacro Grammars (modules) registered as entry points
+    which are importable python modules (no object references in the entrypoint)
+    """
+    wrongNames = set() #set(natlinkmain.wrongFiles.keys())
+    loadedNames = set() #set(natlinkmain.loadedFiles.keys())
+
+    discovered_grammars = entry_points(group="UnimacroGrammar")
+    return discovered_grammars
+
 def checkUnimacroGrammars():
     """see if there are any changed grammar files with respect to original file in release
     
     sync with ...
     """
+
     join, isdir, isfile, listdir = os.path.join, os.path.isdir, os.path.isfile, os.listdir
+
+    # https://docs.python.org/3/library/importlib.metadata.html#entry-points
+
+    unimacro_entry_points=getUnimacroGrammarEntryPoints()
+    for ep in entry_points:
+        py_file_name=f"{ep.name}.py"
+        py_file_value=f"""from unimacro import load_unimacro_entry_point
+load_unimacro_entry_point('{ep.name}')"""
+        file_to_open=Path(status.getUnimacroGrammarsDirectory())/py_file_name
+        with open(file_to_open,'w',encoding='utf-8') as f:
+            f.write(py_file_value)
+
+
+
     u_dir = status.getUnimacroDirectory()
     # u_user_dir = status.getUnimacroUserDirectory()
     u_grammars_dir = status.getUnimacroGrammarsDirectory()
     u_original_grammars_dir = join(u_dir, "UnimacroGrammars")
     assert isdir(u_original_grammars_dir)
-    originalPyFiles = [f for f in listdir(u_original_grammars_dir) if f.endswith('.py')]
+    #todo delete
+    #originalPyFiles = [f for f in listdir(u_original_grammars_dir) if f.endswith('.py')]
+    originalUnimacroGrammarEntryPointNames = unimacro_entry_points.names
     txtFiles = [f for f in listdir(u_grammars_dir) if f.endswith('.txt')]
     activePyFiles = [f for f in listdir(u_grammars_dir) if f.endswith('.py')]
     
-    for f in originalPyFiles:
+    for unimacroEntryPointName in originalUnimacroGrammarEntryPointNames:
+        f=unimacroEntryPointName + ".py"
         org_path = join(u_original_grammars_dir, f)
         txt_file = f.replace('.py', '.txt')
         txt_path = join(u_grammars_dir, txt_file)
         py_path = join(u_grammars_dir, f)
-        nice_name = f[:-3]   # strip off .py
+        nice_name = unimacroEntryPointName   # strip off .py
         checkOriginalFileWithActualTxtPy(nice_name, org_path, txt_path, py_path)
         
     for f in txtFiles:
