@@ -22,6 +22,8 @@ sitePackagesDir = get_site_packages_dir(__file__).lower()
 workDir = str(Path(sitePackagesDir).resolve())
 have_symlinks = (workDir != sitePackagesDir)
     
+def install_file(org_apth,txt_path):
+    return shutil.copyfile(org_path, txt_path)
 
 def checkOriginalFileWithActualTxtPy(name, org_path, txt_path, py_path):
     """check if grammar has been copied, and changed, with copy of .txt as intermediate
