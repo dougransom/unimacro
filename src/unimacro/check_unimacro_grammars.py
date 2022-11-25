@@ -22,8 +22,15 @@ sitePackagesDir = get_site_packages_dir(__file__).lower()
 workDir = str(Path(sitePackagesDir).resolve())
 have_symlinks = (workDir != sitePackagesDir)
     
-def install_file(org_apth,txt_path):
-    return shutil.copyfile(org_path, txt_path)
+def install_file(org_path,txt_path):
+    #org path is ignored, but leave it in the function.
+    #it can be changed to copy the actual file instead of 
+    #the load_buit_in.py stub.
+
+    source_path = Path(__file__).parent / "load_built_in.py"
+
+
+    return shutil.copyfile(source_path, txt_path)
 
 def checkOriginalFileWithActualTxtPy(name, org_path, txt_path, py_path):
     """check if grammar has been copied, and changed, with copy of .txt as intermediate
@@ -35,13 +42,13 @@ def checkOriginalFileWithActualTxtPy(name, org_path, txt_path, py_path):
     """
     isfile = os.path.isfile
     if not isfile(txt_path):
-        shutil.copyfile(org_path, txt_path)
+        install_file(org_path, txt_path)
     org_txt_equal = not bool( get_diff(org_path, txt_path) )
     
     if not isfile(py_path):
         if not org_txt_equal:
             print(f'\tnew release of not activated grammar {name}\n\t\tcopy {org_path} to\n\t\t\t{txt_path}')
-            shutil.copyfile(org_path, txt_path)
+            install_file(org_path, txt_path)
         return 
     txt_py_equal = not bool( get_diff(txt_path, py_path) )
     if txt_py_equal:
@@ -49,8 +56,8 @@ def checkOriginalFileWithActualTxtPy(name, org_path, txt_path, py_path):
             # all equal
             return
         print(f'\tnew release of grammar file, copy to ActiveGrammars {name}')
-        shutil.copyfile(org_path, txt_path)
-        shutil.copyfile(txt_path, py_path)
+        install_file(org_path, txt_path)
+        install_file(txt_path, py_path)
         return
     # txt_py not equal
     if org_txt_equal:
@@ -60,8 +67,8 @@ def checkOriginalFileWithActualTxtPy(name, org_path, txt_path, py_path):
             print(f'--------This new version "{py_path}" is copied to \n\t"{org_path_resolved}" and to\n\t"{txt_path}".')
             print(f'\tThe changes will be saved when you commit and push your git clone of unimacro, "{workDir}".')
             print(f'\t---If you want to undo your changes, revert in git ("{workDir}"),\n\tand copy manually back "{org_path_resolved}"\n\tto "{py_path}".\n--------')
-            shutil.copyfile(py_path, org_path_resolved)
-            shutil.copyfile(org_path_resolved, txt_path)
+            install_file(py_path, org_path_resolved)
+            install_file(org_path_resolved, txt_path)
         else:
             print(f'****grammar {name} in ActiveGrammars changed, cannot copy to UnimacroGrammars because you are not developing in symlink mode (with "flit install --symlink")')
         return
