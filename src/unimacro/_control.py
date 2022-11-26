@@ -639,7 +639,9 @@ class UtilGrammar(ancestor):
     def getUnimacroGrammarNames(self):
         ep=check_unimacro_grammars.getUnimacroGrammarEntryPoints()
         #unzip ep, grab the names as the first column, covert to a list.
-        names = list(list(zip(*ep))[0])
+        names = []
+        if ep:
+            names = list(list(zip(*ep))[0])
         return names
 
     def getUnimacroGrammarEntryPoints(self):

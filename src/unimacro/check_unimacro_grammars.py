@@ -27,7 +27,7 @@ sitePackagesDir = get_site_packages_dir(__file__).lower()
 workDir = str(Path(sitePackagesDir).resolve())
 have_symlinks = (workDir != sitePackagesDir)
     
-def make_script_from_entry_point(name,path)
+def make_script_from_entry_point(name,path):
     """ Make a script that imports the entry point.
     """
     pass
