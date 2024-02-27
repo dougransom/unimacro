@@ -25,7 +25,7 @@ from dtactions.unimacro import unimacroutils
 from dtactions.unimacro import unimacroactions as actions
 
 from unimacro import natlinkutilsbj as natbj
-from unimacro import spokenforms
+from unimacro import spokenforms, unimacro_logger
 
 status = natlinkstatus.NatlinkStatus()
 natlinkmain = loader.NatlinkMain()
@@ -75,7 +75,7 @@ class UtilGrammar(ancestor):
     else:
         specials = ""
     
-    gramRules = ['show', 'edit', 'switch', 'showexclusive', 'resetexclusive', 'checkalphabet', 'message']
+    gramRules = ['show', 'edit', 'switch', 'showexclusive', 'resetexclusive', 'checkalphabet', 'message','logging_level','loglevel']
     gramDict = {}
     gramDict['show'] = """<show> exported = show ((all|active) grammars |
                         {gramnames} | (grammar|inifile) {gramnames}
@@ -87,6 +87,9 @@ class UtilGrammar(ancestor):
     gramDict['resetexclusive'] = """<resetexclusive> exported = reset (exclusive | exclusive grammars);"""
     gramDict['checkalphabet'] = """<checkalphabet> exported = check alphabet;"""
     gramDict['message'] = """<message> exported = {message};"""
+    gramDict['logging_level'] = """<logging_level> exported = (global|unimacro) log level <loglevel>"""
+    gramDict['loglevel'] = "(debug|info|warning|error|critical)"
+
 
     gramSpec = []
     assert set(gramRules) == set(gramDict.keys())
@@ -327,7 +330,11 @@ class UtilGrammar(ancestor):
         # gram.unload()
         print('grammar "%s" switched off'% gram.getName())
         return 1
-         
+    def gotResults_logging_level(self,words,fullresults):
+        """
+        """
+        unimacro_logger.info("gotResults_logging_level words: {words} fullResults: {fullresults}")
+        return 1
     def gotResults_showexclusive(self,words,fullResults):
 
         All = 0
