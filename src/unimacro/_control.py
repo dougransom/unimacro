@@ -26,6 +26,8 @@ from dtactions.unimacro import unimacroactions as actions
 
 from unimacro import natlinkutilsbj as natbj
 from unimacro import spokenforms 
+import importlib.metadata as meta
+
 #from unimacro.logger import ulogger
 status = natlinkstatus.NatlinkStatus()
 natlinkmain = loader.NatlinkMain()
@@ -53,9 +55,38 @@ Normal=0
 # 
 showAll = 1  # reset if no echo of exclusive commands is wished
 
+def natlink_loggers() ->dict:
+    """ 
+        returns dictionary, keys are the names of the module to show to users (or for them to use in dication), 
+        values are the string names of the loggers.
+        For example, {'unimacro':'natlink.unimacro'}.
+        Any python module/package/etc. can enable their own logger by defining an entry point in group 'natlink.loggers'.  
+        The entry point must be a function that returns a logger name.  Is the Python 'logging' module.
+
+    """
+
+
+    discovered_eps=meta.entry_points(group='natlink.loggers')
+    ulogger.debug(f"Entry Points for natlink.loggers:  {discovered_eps}")
+    loggers=dict()
+    for ep in discovered_eps:
+        try:
+            (name,_)=ep
+            ulogger.debug(f"Entry Point {ep}")
+            f=ep.load()
+            logname=f()
+            loggers[name]=logname
+        except Exception as e:
+            ulogger.error(f"Attempting to load EntryPoint {ep},error\n {e}")
+    return loggers
+
 ancestor = natbj.IniGrammar
 class UtilGrammar(ancestor):
     language = status.get_language()
+    
+    loggers=natlink_loggers()
+    ulogger.debug(f"Control:  Available Loggers  {loggers}")
+    loggers_names=sorted(loggers.keys())
     iniIgnoreGrammarLists = ['gramnames', 'tracecount', 'message'] # are set in this module
 
     name = 'control'
@@ -67,6 +98,7 @@ class UtilGrammar(ancestor):
 
     # if spokenforms:   ## assume spokenforms is imported!!!
     specialList.append("'spoken forms'")
+    specialList.append("loggers")
     if specialList:
         specials = "|" + '|'.join(specialList)
     else:
@@ -84,7 +116,7 @@ class UtilGrammar(ancestor):
     gramDict['resetexclusive'] = """<resetexclusive> exported = reset (exclusive | exclusive grammars);"""
     gramDict['checkalphabet'] = """<checkalphabet> exported = check alphabet;"""
     gramDict['message'] = """<message> exported = {message};"""
-    gramDict['setlogging'] = """<setlogging> exported = (natlink|unimacro) loglevel <loglevel>;"""
+    gramDict['setlogging'] = """<setlogging> exported = {logmodulename}  loglevel <loglevel>;"""
     gramDict['loglevel'] = "<loglevel> = (debug|info|warning|error|critical);"
 
 
@@ -119,6 +151,7 @@ class UtilGrammar(ancestor):
         # temp set allResults to 0, disabling the messages trick:
         if not self.load(self.gramSpec, allResults=showAll):
             return
+        self.setList('logmodulename',self.loggers_names)
         self.RegisterControlObject(self)
         self.emptyList('message')
         # at post load
@@ -335,17 +368,12 @@ class UtilGrammar(ancestor):
         """
         ulogger.debug(f"unimacro logger gotResults_logging_level words: {words} fullResults: {fullresults}")
 
-        loglevel_for = words[0]   # natlink or unimacro
+        loglevel_for = words[0]   # something like natlink, unimacro,... 
         new_level_str_mc,_=fullresults[-1]
         new_log_level_str=new_level_str_mc.upper()
-        #the string better be defined in l (logging module).
+        #the string should be in the 
+        logger_name=self.loggers[loglevel_for]
         new_log_level=l.__dict__[new_log_level_str]
-        logger_name=""
-        match loglevel_for:
-            case 'natlink' :
-                logger_name=loglevel_for
-            case 'unimacro':                    #anticpate ading more to this case later, liked dragonfly or vocola, if they add loggers.
-                logger_name=f'natlink.{loglevel_for}'
 
         ulogger.debug(f"New Log Level {new_log_level_str} for logger {logger_name}")
         logger=l.getLogger(logger_name)
@@ -435,6 +463,9 @@ class UtilGrammar(ancestor):
             exclNames = [gname for gname, gram in G.items() if gram.isExclusive()]
             ulogger.info(f'exclusive grammars (+ control) are: {exclNames}')
             self.gotResults_showexclusive(words, fullResults)
+            return
+        if self.hasCommon(words,"loggers"):
+            ulogger.info(f"Available Loggers: {self.loggers}")
             return
 
 

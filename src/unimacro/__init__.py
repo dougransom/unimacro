@@ -8,6 +8,8 @@ You can always access it by name.  It is created in _control.py.
 import os
 import sys
 
-
+def logname() -> str:
+    """ Returns the name of the unimacro logger."""
+    return "natlink.unimacro"
 __version__ = '4.1.4.2'   
  
