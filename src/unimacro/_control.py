@@ -9,7 +9,7 @@
 # _control.py, adapted version of_gramutils.py
 # Author: Bart Jan van Os, Version: 1.0, nov 1999
 # starting new version Quintijn Hoogenboom, August 2003, for python3 2023
-#pylint:disable=C0115, C0116, W0702, R0904, R0911, R0912, R0914, R0915, W0201, W0613, W0107, C0209, E0601, W0602
+#pylint:disable=C0115, C0116, W0702, R0904, R0911, R0912, R0914, R0915, W0201, W0613, W0107, C0209, E0601, W0602, C0112
 #pylint:disable=E1101
 
 import os
@@ -42,19 +42,6 @@ Normal=0
 # 
 # 
 showAll = 1  # reset if no echo of exclusive commands is wished
-#voicecodeHome = None
-#if 'VCODE_HOME' in os.environ:
-#    voicecodeHome = os.environ['VCODE_HOME']
-#    if os.path.isdir(voicecodeHome):
-#        for subFolder in ('Admin', 'Config', 'Mediator'):
-#            newFolder = os.path.join(voicecodeHome, subFolder)
-#            if os.path.isdir(newFolder) and newFolder not in sys.path:
-#                sys.path.append(newFolder)
-#                print 'appending to sys.path: %s'% newFolder
-#    else:
-#        print '_control: VCODE_HOME points NOT to a directory: %s'% voicecodeHome
-#        voicecodeHome = None
-        
 
 ancestor = natbj.IniGrammar
 class UtilGrammar(ancestor):
@@ -75,7 +62,7 @@ class UtilGrammar(ancestor):
     else:
         specials = ""
     
-    gramRules = ['show', 'edit', 'switch', 'showexclusive', 'resetexclusive', 'checkalphabet', 'message','logging_level','loglevel']
+    gramRules = ['show', 'edit', 'switch', 'showexclusive', 'resetexclusive', 'checkalphabet', 'message','setlogging','loglevel']
     gramDict = {}
     gramDict['show'] = """<show> exported = show ((all|active) grammars |
                         {gramnames} | (grammar|inifile) {gramnames}
@@ -87,8 +74,8 @@ class UtilGrammar(ancestor):
     gramDict['resetexclusive'] = """<resetexclusive> exported = reset (exclusive | exclusive grammars);"""
     gramDict['checkalphabet'] = """<checkalphabet> exported = check alphabet;"""
     gramDict['message'] = """<message> exported = {message};"""
-    gramDict['logging_level'] = """<logging_level> exported = (global|unimacro) log level <loglevel>"""
-    gramDict['loglevel'] = "(debug|info|warning|error|critical)"
+    gramDict['setlogging'] = """<setlogging> exported = (global|unimacro) loglevel <loglevel>;"""
+    gramDict['loglevel'] = "<loglevel> = (debug|info|warning|error|critical);"
 
 
     gramSpec = []
@@ -101,7 +88,8 @@ class UtilGrammar(ancestor):
         gramSpec.append(gramDict[rulename])
     
     
-    ## extra: the trace rule:    
+    ## extra: the trace rule:
+    ## TODO QH, switchoff for the moment, febr24
     if specials:
         specials2 = specials[1:]  # remove initial "|" (at show it is  "| actions | 'spoken forms'", here it is
                                   #     "actions | 'spoken forms'" only, because gramnames etc are not implemented
@@ -109,8 +97,8 @@ class UtilGrammar(ancestor):
         traceSpecial = """<trace> exported = trace (("""+ specials2 +""") |
                               ((on|off| {tracecount})("""+ specials2 +""")) |
                               (("""+ specials2 +""") (on|off|{tracecount}))) ;"""
-        gramSpec.append(traceSpecial) # add trace for actions of spoken forms (latter not implemented)
-
+        # gramSpec.append(traceSpecial) # add trace for actions of spoken forms (latter not implemented)
+    print('check, correct _control?????')
 
     Mode = Normal
     LastMode = Normal
@@ -126,11 +114,14 @@ class UtilGrammar(ancestor):
         # at post load
         # allGramNames = self.getUnimacroGrammarNames()
         # self.setList('gramnames', allGramNames)
-        self.setNumbersList('tracecount', tracecount)
+        ## TODO QH switch on again if tracing is activated again
+        # self.setNumbersList('tracecount', tracecount)
         
         self.activateAll()
         self.setMode(Normal)
         self.startExclusive = self.exclusive # exclusive state at start of recognition!
+        self.loglevel_for = None
+        self.current_loglevel = None
 ##        if unimacroutils.getUser() == 'martijn':
 ##            print 'martijn, set exclusive %s'% self.name
 ##            self.setExclusive(1)
@@ -186,7 +177,7 @@ class UtilGrammar(ancestor):
     def gotResults_checkalphabet(self,words,fullResults):
         """check the exact spoken versions of the alphabet in spokenforms
         """
-        version = unimacroutils.getDNSVersion()
+        version = status.getDNSVersion()
         _spok = spokenforms.SpokenForms(self.language, version)
         alph = 'alphabet'
         ini = spokenforms.ini
@@ -330,11 +321,25 @@ class UtilGrammar(ancestor):
         # gram.unload()
         print('grammar "%s" switched off'% gram.getName())
         return 1
-    def gotResults_logging_level(self,words,fullresults):
+
+    def gotResults_setlogging(self,words, fullresults):
         """
         """
         unimacro_logger.info("gotResults_logging_level words: {words} fullResults: {fullresults}")
-        return 1
+        self.loglevel_for = words[0]   # global or unimacro
+
+    def gotResults_loglevel(self,words,fullresults):
+        """
+        """
+        unimacro_logger.info("gotResults_logging_level words: {words} fullResults: {fullresults}")
+        new_loglevel = words[-1]
+        if self.current_loglevel == new_loglevel:
+            unimacro_logger.info('loglevel for "%s" is already: "%s"'% (self.loglevel_for, new_loglevel))
+            return
+        print(f'setting loglevel "{new_loglevel}" for "{self.loglevel_for}"')
+        ##TODO Doug
+        
+    
     def gotResults_showexclusive(self,words,fullResults):
 
         All = 0
