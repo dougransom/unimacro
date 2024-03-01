@@ -40,6 +40,9 @@ dev = [
 [project.entry-points."natlink.grammars"]
 unimacro_builtins = "unimacro.UnimacroGrammars:locateme"
 
+[project.entry-points."natlink.loggers"]
+	unimacro ="unimacro:logname"
+
 [tool.pytest.ini_options]
 minversion = "7.1.2"
 addopts = "--capture=tee-sys "
