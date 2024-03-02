@@ -27,6 +27,7 @@ from dtactions.unimacro import unimacroactions as actions
 from unimacro import natlinkutilsbj as natbj
 from unimacro import spokenforms 
 import importlib.metadata as meta
+import sys
 
 #from unimacro.logger import ulogger
 status = natlinkstatus.NatlinkStatus()
@@ -49,10 +50,8 @@ ulogger.debug("natlink.unimacro logger available")
 
 
 
-def control_logger_name() -> str : 
-        return "natlink.unimacro.control"
 
-control_logger=l.getLogger(control_logger_name())
+control_logger=l.getLogger(unimacro_l.control_logger_name())
 
 
 
@@ -83,16 +82,22 @@ def natlink_loggers() ->dict:
     """
 
 
-    discovered_eps=meta.entry_points(group='natlink.loggers')
+    discovered_eps=meta.entry_points(group='dt.loggers')
     ulogger.debug(f"Entry Points for natlink.loggers:  {discovered_eps}")
     loggers=dict()
     for ep in discovered_eps:
         try:
             (name,_)=ep
-            ulogger.debug(f"Entry Point {ep}")
-            f=ep.load()
-            logname=f()
-            loggers[name]=logname
+            module=ep.module
+            module_loaded=module in sys.modules
+
+            ulogger.debug(f"Entry Point {ep} module: {module}  is loaded:  {module_loaded}.  {'' if module_loaded else 'Not adding to list of available loggers.'} ")
+
+            #only add the logger to the list of available loggers if the module is already loaded.
+            if module_loaded:              
+                f=ep.load()
+                logname=f()
+                loggers[name]=logname
         except Exception as e:
             ulogger.error(f"Attempting to load EntryPoint {ep},error\n {e}")
     return loggers

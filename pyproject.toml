@@ -35,14 +35,14 @@ test = [
     "pytest >=7.1.2","flake8"
 ]
 dev = [
-	"pyenvutils","entry-point-inspector"
+	"pyenvutils","entry-point-inspector","build"
 ]
 [project.entry-points."natlink.grammars"]
 unimacro_builtins = "unimacro.UnimacroGrammars:locateme"
 
-[project.entry-points."natlink.loggers"]
+[project.entry-points."dt.loggers"]
 	unimacro ="unimacro:logname"
-	control="unimacro._control:control_logger_name"
+	control="unimacro:control_logger_name"
 
 [tool.pytest.ini_options]
 minversion = "7.1.2"
