@@ -13,8 +13,8 @@ An attempt is made to move information step by step to this website.
 
    grammars
    project
-   documentation
-   
+
+
 Indices and tables
 ==================
 

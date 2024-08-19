@@ -1,10 +1,4 @@
+Project of Unimacro
+=====================================
 
-Project
-==============================================================================
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   documentation
-
+More about the Unimacro project will follow here...

@@ -17,7 +17,7 @@ import sys
 
 src_directory = os.path.join(os.path.abspath('..'), 'src')
 sys.path.insert(0, src_directory)
-# print(sys.path)
+print(sys.path)
 print('='*20)
 import unimacro
 
@@ -49,6 +49,10 @@ class Mock(MagicMock):
 mock_modules = {
     'ctypes',
     'dtactions',  # DF: uncertain about this one.
+    'dtactions.sendkeys',
+    'dtactions.unimacro',
+    'dtactions.unimacro.unimacroactions',
+    'dtactions.unimacro.utilsqh',
     'pywintypes',
     'win32api',
     'win32clipboard',
@@ -64,6 +68,7 @@ mock_modules = {
     'natlink',
     'pydebugstring',
     'debugpy',
+    'natlinkcore',
 }
 for module_name in mock_modules:
     sys.modules[module_name] = Mock()
