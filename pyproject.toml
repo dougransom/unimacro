@@ -37,6 +37,11 @@ test = [
 dev = [
 	"pyenvutils","entry-point-inspector","build"
 ]
+doc = [
+"Sphinx>=8.0.2",
+"mock",
+"sphinx_rtd_theme"
+]
 [project.entry-points."natlink.grammars"]
 unimacro_builtins = "unimacro.UnimacroGrammars:locateme"
 
