@@ -18,3 +18,4 @@ README.html
 /documentation/*~
 /documentation/.#*
 /documentation/#*.rst#
+/documentation/_build/
