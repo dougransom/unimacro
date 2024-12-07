@@ -9,7 +9,7 @@
 # moved to the GitHub/Dictation-toolbox April 2020, improved vastly Febr 2024 (with partly new options)
 #pylint:disable=C0302, W0613, W0702, R0911, R0912, R0913, R0914, R0915, W0212, W0703
 #pylint:disable=E1101, C0209
-r"""with this grammar, you can reach folders, files and websites from any window.
+r"""with this grammar, you can reach folders, files and websites (or any other URL) from any window.
 From some windows (my computer and most dialog windows) the folders and files
 can be called directly by name if they are in the foreground.
 
@@ -895,27 +895,29 @@ class ThisGrammar(ancestor):
        
 
     def gotResults_website(self,words,fullResults):
-        """start webbrowser, websites in inifile unders [websites]
-        
-        if www. is not given insert, if https:// is not given insert it.
+        """start webbrowser or other application that can opena  URL.
+        There are URLs for other programs, such as msedge: to open a URL specifically in edge, or mailto: to open
+        an email client with a template.
 
-        so if you have an old http:// or eg qh.antenna.nl you MUST insert http:// or https://
-
-        if <dgndictation> try google!!
-
+ 
+        If there is a ':' in the provied URL, then use the URL as it is.
+        If there is no ':', then assume https.
+ 
         """
         if len(words) == 1 and self.nextRule == 'dgndictation':
             self.waitForDictation = 'website'
             return
 
         site = self.getFromInifile(words, 'websites')
-        if site.startswith("http:") or site.startswith("https:"):
-            pass
-        else:
-            site = "https://"+site
-        if ((site.startswith('http:') or site.startswith('https:')) and 
-                    site.find('\\') > 0):
-            site = site.replace('\\', '/')
+        has_url_scheme = ':' in site
+
+        if not has_url_scheme:
+            logger.warning("URL %s has no URL Scheme (ie https://), it probably won't work.",site)
+
+        # should this be removed, require users to have correct URLs?
+
+
+ 
         self.wantedWebsite = site
         
            
