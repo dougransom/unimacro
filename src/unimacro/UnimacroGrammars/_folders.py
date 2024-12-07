@@ -153,13 +153,15 @@ class ThisGrammar(ancestor):
 <thisfile> exported = ((here|this) file) (<filecommands>|<remember>); 
 <filecommands> = {filecommands}| on ({letters}|{virtualdrivesspoken}) |
                 ('open with') {fileopenprograms}|<namepathcopy>;
-
 <website> exported = website {websites} [<websitecommands>]; 
 <thiswebsite> exported = (this website) (<websitecommands>|<remember>);
 <websitecommands> = ('open with') {websiteopenprograms}|
                     <namepathcopy>;
 <remember> = remember;  
 <namepathcopy> = (copy (name|path)) | ((name|path) copy);
+<dial> exported = dial {dial_recipients};
+<message> exported = message {message_recipients};
+<email> exported = message {message_recipients};
 
 """
     def initialize(self):
@@ -217,7 +219,7 @@ class ThisGrammar(ancestor):
         if self.mayBeSwitchedOn == 'exclusive':
             self.info('recog folders, switch off mic')
             natbj.SetMic('off')
-        self.wantedFolder = self.wantedFile = self.wantedWebsite = None
+        self.wantedFolder = self.wantedFile = self.wantedURL = None
         self.catchRemember = None
         self.gotFolder = self.gotFile = self.gotWebsite = False ## for catching 
         
@@ -893,8 +895,19 @@ class ThisGrammar(ancestor):
     #     wantedFolder = self.recentfoldersList[chooseNum]
     #     self.gotoFolder(wantedFolder)
        
+    def gotResults_message(self,words,fullResults):
+        pass
+   
+    def results_email(self,words,fullResults):
+        pass
+
+    def gotResults_dial(self,words,fullResults):
+        pass
 
     def gotResults_website(self,words,fullResults):
+        self.process_url_results('websites',words,fullResults)
+
+    def process_url_results(self,ini_key,words,fullResults):
         """start webbrowser or other application that can opena  URL.
         There are URLs for other programs, such as msedge: to open a URL specifically in edge, or mailto: to open
         an email client with a template.
@@ -905,20 +918,20 @@ class ThisGrammar(ancestor):
  
         """
         if len(words) == 1 and self.nextRule == 'dgndictation':
-            self.waitForDictation = 'website'
+            self.waitForDictation = 'website'   #use for all URLs
             return
-
-        site = self.getFromInifile(words, 'websites')
+        
+        logger.debug(f"Words: {words} ini_key: {ini_key} ")
+    
+        site = self.getFromInifile(words, ini_key)
+        logger.debug("url {site}")
         has_url_scheme = ':' in site
 
         if not has_url_scheme:
-            logger.warning("URL %s has no URL Scheme (ie https://), it probably won't work.",site)
-
-        # should this be removed, require users to have correct URLs?
-
+            logger.warning("URL %s has no URL Scheme (ie https://, mailto: etc.), it probably won't work.",site)
 
  
-        self.wantedWebsite = site
+        self.wantedURL = site
         
            
     def gotResults_thiswebsite(self,words,fullResults):
@@ -928,10 +941,10 @@ class ThisGrammar(ancestor):
         unimacroutils.saveClipboard()
         action('SSK {alt+d}{extend}{shift+exthome}{ctrl+c}')
         action("VW")
-        self.wantedWebsite = unimacroutils.getClipboard()
-        self.wantedWebsite = self.wantedWebsite.rstrip("/")
+        self.wantedURL = unimacroutils.getClipboard()
+        self.wantedURL = self.wantedURL.rstrip("/")
         self.catchRemember = "website"
-        self.info('this website: %s', self.wantedWebsite)
+        self.info('this website: %s', self.wantedURL)
         unimacroutils.restoreClipboard()
         if self.hasCommon(words, "remember"):
             ## dgndictation is not used at the moment!!
@@ -939,13 +952,13 @@ class ThisGrammar(ancestor):
                 self.catchRemember = "website"
             else:
                 self.checkForChanges = True
-                spokenWebsite = self.getWebsiteBasenameRemember(self.wantedWebsite)
+                spokenWebsite = self.getWebsiteBasenameRemember(self.wantedURL)
                 if not spokenWebsite:
-                    self.info("_folders, could not extract a nice spoken website from %s\nTry ", self.wantedWebsite)
+                    self.info("_folders, could not extract a nice spoken website from %s\nTry ", self.wantedURL)
                     self.info('Try "this website remember as <dgndictation>"')
                     return
-                self.ini.set("websites", spokenWebsite, self.wantedWebsite)
-                self.info('with "website %s" you can now open %s', spokenWebsite, self.wantedWebsite)
+                self.ini.set("websites", spokenWebsite, self.wantedURL)
+                self.info('with "website %s" you can now open %s', spokenWebsite, self.wantedURL)
                 self.ini.write()
 
     def getWebsiteBasenameRemember(self, url):
@@ -1027,12 +1040,12 @@ class ThisGrammar(ancestor):
     def gotResults_websitecommands(self,words,fullResults):
         """start webbrowser, specified
         
-        expect self.wantedWebsite to be filled.
+        expect self.wantedURL to be filled.
         
         open with list in inifile, expected right hand sides to be browsers
         """
-        if not self.wantedWebsite:
-            self.info('websitecommands, no valid self.wantedWebsite: %s', self.wantedWebsite)
+        if not self.wantedURL:
+            self.info('websitecommands, no valid self.wantedURL: %s', self.wantedURL)
 
         nextOpenWith = False
 
@@ -1204,13 +1217,13 @@ class ThisGrammar(ancestor):
                 result = self.wantedFile
 
         elif self.catchRemember == "website":
-            if not self.wantedWebsite:
+            if not self.wantedURL:
                 self.info("_folders, namepathcopy, no valid website")
                 return
             if what == 'name':
-                result = self.wantedWebsite.split("/")[-1]
+                result = self.wantedURL.split("/")[-1]
             else:
-                result = self.wantedWebsite.split()[-1]
+                result = self.wantedURL.split()[-1]
         else:
             result = ''
         self.info('namepathcopy, result: %s (type: %s)', result, type(result))
@@ -1235,12 +1248,12 @@ class ThisGrammar(ancestor):
             default = self.rememberBase
             section = 'folders'
         elif self.catchRemember == "website":
-            self.rememberBase = self.getWebsiteBasenameRemember(self.wantedWebsite)
+            self.rememberBase = self.getWebsiteBasenameRemember(self.wantedURL)
             texts = ['Remember website for future calling?']
-            texts.append('- %s -'% self.wantedWebsite)
+            texts.append('- %s -'% self.wantedURL)
             texts.append("Please give a spoken form for this website and choose OK; or Cancel...")
             section = 'websites'
-            value = self.wantedWebsite
+            value = self.wantedURL
             default = self.rememberBase
         elif self.catchRemember == "file":
             self.rememberBase = self.getFileBasenameRemember(self.wantedFile)
@@ -1261,7 +1274,7 @@ class ThisGrammar(ancestor):
             self.checkForChanges = 10  # switch this on 10 utterances
         pausetime = 3
         # reset variables, no action in gotResults:
-        self.wantedFile = self.wantedFolder = self.wantedWebsite = ""
+        self.wantedFile = self.wantedFolder = self.wantedURL = ""
         self.info(f'thisDir: {thisDir}')
         UnimacroDirectory = envvars.expandEnvVariableAtStart('%Unimacro%')
         self.info(f'UnimacroDirectory: {UnimacroDirectory}')
@@ -2126,8 +2139,8 @@ class ThisGrammar(ancestor):
             self.gotoFolder(self.wantedFolder)
         if self.wantedFile:
             self.gotoFile(self.wantedFile)
-        if self.wantedWebsite:
-            self.gotoWebsite(self.wantedWebsite)
+        if self.wantedURL:
+            self.gotoWebsite(self.wantedURL)
 
     def gotoInThisComputer(self, f):
         """perform the keystrokes to go to a folder in this computer
