@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from distutils.dir_util import copy_tree
 import natlink
-from functools import cache
+from functools import cache,reduce
 import importlib
 from shutil import copy as file_copy
 thisDir = Path(__file__).parent
@@ -37,15 +37,19 @@ def make_copy_grammar_ini_fixture(grammar_ini_file : str):
 
 
 @pytest.fixture()
-def unimacro_setup(tmpdir):
+def unimacro_setup(tmp_path : Path):
   
-    tmp_test_root = tmpdir
+    tmp_test_root = tmp_path
 
-    natlink_config_dir=tmp_test_root.mkdir('.natlink')
-    unimacro_userdir=tmp_test_root.mkdir("unimacro_user_directory")
+    natlink_config_dir=tmp_test_root/'.natlink'
+    unimacro_userdir=tmp_test_root / "unimacro_user_directory"
+    vocola_userdir=tmp_test_root/"vocola_user_directory"
+    natlink_usergrammars_dir=tmp_test_root / "natlink_user_grammars"
+    for p in [natlink_config_dir,unimacro_userdir,vocola_userdir,natlink_usergrammars_dir]:
+        p.mkdir(parents=True,exist_ok=True)
+    
     natlink_config_file=natlink_config_dir/"natlink.ini"
-    vocola_userdir=tmp_test_root.mkdir("vocola_user_directory")
-    natlink_usergrammars_dir=tmp_test_root.mkdir("natlink_user_grammars")
+
     sub={
         'unimacrotestuserdirectory':unimacro_userdir,
         'vocolatestuserdirectory':vocola_userdir,
