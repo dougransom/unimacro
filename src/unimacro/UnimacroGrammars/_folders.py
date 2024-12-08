@@ -900,18 +900,21 @@ class ThisGrammar(ancestor):
     # nothing stopping one from putting an mailto: url in a websites
     # section though.  
     #        
-    def gotResults_message(self,words,fullResults):
-        self.process_url_results('message_recipients',words,fullResults)
 
-    def gotResults_email(self,words,fullResults):
-        self.process_url_results('email_recipients',words,fullResults)
+    #the methods to process url results are copy and paste with a different constant 
+    #as the first argument
+    #factory for makes a gotResults method
+    @staticmethod
+    def make_process_url_fn(key):
+        def gotResults(self,*args,**kwargs):
+            f"Process URLs for the {key} section in _folders.ini"
+            self.process_url_results(key,*args,*kwargs)
+        return gotResults
 
-    def gotResults_dial(self,words,fullResults):
-        self.process_url_results('dial_recipients',words,fullResults)
-
-    def gotResults_website(self,words,fullResults):
-        self.process_url_results('websites',words,fullResults)
-
+    #add the gotResults_ method for each pair of gotResults_ and the key name in the _folders.ini
+    for k,v in zip(['email','message','dial','website'],['email_recipients','message_recipients','dial_recipients','websites']):
+        locals()["gotResults_" +k]=make_process_url_fn(v)
+ 
     def process_url_results(self,ini_key,words,fullResults):
         """start webbrowser or other application that can opena  URL.
         There are URLs for other programs, such as msedge: to open a URL specifically in edge, or mailto: to open
