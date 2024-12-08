@@ -161,7 +161,7 @@ class ThisGrammar(ancestor):
 <namepathcopy> = (copy (name|path)) | ((name|path) copy);
 <dial> exported = dial {dial_recipients};
 <message> exported = message {message_recipients};
-<email> exported = message {message_recipients};
+<email> exported = message {email_recipients};
 
 """
     def initialize(self):
@@ -894,15 +894,20 @@ class ThisGrammar(ancestor):
     #     """
     #     wantedFolder = self.recentfoldersList[chooseNum]
     #     self.gotoFolder(wantedFolder)
-       
+
+    #URLs for emails, web sites, etc. are handled the same,
+    # but placed in different sections.  
+    # nothing stopping one from putting an mailto: url in a websites
+    # section though.  
+    #        
     def gotResults_message(self,words,fullResults):
-        pass
-   
+        self.process_url_results('message_recipients',words,fullResults)
+
     def results_email(self,words,fullResults):
-        pass
+        self.process_url_results('email_recipients',words,fullResults)
 
     def gotResults_dial(self,words,fullResults):
-        pass
+        self.process_url_results('dial_recipients',words,fullResults)
 
     def gotResults_website(self,words,fullResults):
         self.process_url_results('websites',words,fullResults)
