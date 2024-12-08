@@ -161,7 +161,7 @@ class ThisGrammar(ancestor):
 <namepathcopy> = (copy (name|path)) | ((name|path) copy);
 <dial> exported = dial {dial_recipients};
 <message> exported = message {message_recipients};
-<email> exported = message {email_recipients};
+<email> exported = email {email_recipients};
 
 """
     def initialize(self):
@@ -903,7 +903,7 @@ class ThisGrammar(ancestor):
     def gotResults_message(self,words,fullResults):
         self.process_url_results('message_recipients',words,fullResults)
 
-    def results_email(self,words,fullResults):
+    def gotResults_email(self,words,fullResults):
         self.process_url_results('email_recipients',words,fullResults)
 
     def gotResults_dial(self,words,fullResults):
