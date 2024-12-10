@@ -38,11 +38,10 @@ from io import StringIO
 # use extension Click by Voice
 visiblePause = 0.4
 
-language = unimacroutils.getLanguage()
-def logger_name():
-    return "natlink.unimacro.clickbyvoice"
 
-logger = getLogger(logger_name())
+
+language = unimacroutils.getLanguage()
+
 
 #logger should be used instead of print
 #replace print to avoid unintended use.
@@ -50,12 +49,39 @@ builtin_print=print
 def our_print(*args,**kwargs):
     f=StringIO()
     builtin_print(args,kwargs,file=f)
-    value=f.getvalue()
+    value=f.getvalue()  
     logger.debug("print called instead of logging functions: %s", value)
     logger.error(value)
 
 ancestor = natbj.IniGrammar
 class ThisGrammar(ancestor):
+
+    @staticmethod
+    def static_logger_name():
+        return __name__
+
+    @staticmethod   
+    def static_logger_short_name():
+        return logger_name().split('.')[-1]
+    
+    logger = getLogger(static_logger_name())
+
+    @classmethod
+    def module() -> str:
+        return __module__
+    
+
+    #this should be moved to a base class
+    #overridden only if you don't want to use the module name for the logger name
+    def logger_name(self) ->str:
+        """Returns the name of a logger. Replace this and loggerShortName to create a logger for an inherited grammar. """
+        return ThisGrammar.static_logger_name()
+
+    #this should be moved to a base class.
+    def loggerShortName(self) ->str:
+        """A key for use as a  spoken form or user interface item.  """
+        return ThisGrammar.static_logger_short_name()
+    
 
     try:
         numberGram = natbj.numberGrammarTill999[language]
@@ -92,13 +118,12 @@ class ThisGrammar(ancestor):
         self.prevHandle = -1
         self.ActiveHndle = None
         self.load(self.gramSpec)
-    def loggerName(self) ->str:
-        """Returns the name of a logger. Replace this and loggerShortName to create a logger for an inherited grammar. """
-        return "natlink.unimacro.clickbyvoice"
 
-    def loggerShortName(self) ->str:
-        """A key for use as a  spoken form or user interface item.  """
-        return "clickbyvoice"
+
+    
+
+
+    
     def gotBegin(self,moduleInfo):
         if not language:
             return
@@ -153,6 +178,7 @@ class ThisGrammar(ancestor):
         """show the numbers, with additional options
 
         """
+        logger.debug(f"__file__ {__file__} "  )
         logger.debug( 'showhidenumbers, words: %s', words)
         showNumbers = ":+"  # fresh start, just in case
         additionalOptions = False
