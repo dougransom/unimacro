@@ -31,6 +31,7 @@ from dtactions import unimacroutils
 from dtactions import unimacroactions as actions
 
 from unimacro import natlinkutilsbj as natbj
+from unimacro.natlinkutilsbj import grammar_log
 from unimacro import spokenforms 
 from unimacro import __version__ as unimacro_version
 #from unimacro.logger import ulogger
@@ -43,16 +44,14 @@ ulogger : l.Logger = l.getLogger(unimacro_l.logname())
 #Loggers can be created for any module, and they can propogate to the parent  Logger, or not.
 #As an example, this module for the control grammar has its own child logger of unimacro.
 #Note an entry point has to be defined as well, in pyproject.toml, so Loggers for various natlink components can be discovered.
-control_logger=l.getLogger(unimacro_l.control_logger_name())
+
 
 
 unimacro_l.__dict__['ulogger']=ulogger
 ulogger.debug("natlink.unimacro logger available")
 status = natlinkstatus.NatlinkStatus()
 natlinkmain = loader.NatlinkMain()
-##control_logger=l.getLogger(unimacro_l.control_logger_name())
 thisDir = str(Path(__file__).parent)
-
 
 
 
@@ -99,6 +98,7 @@ def natlink_loggers() ->dict:
     return loggers
 
 ancestor = natbj.IniGrammar
+@grammar_log("unimacro.control","control")
 class UtilGrammar(ancestor):
     language = status.get_language()
     
@@ -175,13 +175,6 @@ class UtilGrammar(ancestor):
         self.info('---now starting other Unimacro grammars:')
 
 
-    def loggerName(self) ->str:
-        """Returns the name of a logger. Replace this and loggerShortName to create a logger for an inherited grammar. """
-        return unimacro_l.control_logger_name()
-
-    def loggerShortName(self) ->str:
-        """A key for use as a  spoken form or user interface item.  """
-        return "control"
 
     def unload(self):
         self.UnregisterControlObject()
@@ -453,10 +446,8 @@ class UtilGrammar(ancestor):
 
         grammars = self.getUnimacroGrammars()
         gramNames = list(grammars.keys())
-        print("gramNames")
-        print(f'{gramNames}')
-        print(f"self.debug {self.debug} self.info {self.info}")
-        self.info("info")
+        self.info("gramNames")
+        self.info(f'{gramNames}')
         self.debug(f'_control, gramNames: {gramNames}')
         gramName = self.hasCommon(words, gramNames)
         if gramName:

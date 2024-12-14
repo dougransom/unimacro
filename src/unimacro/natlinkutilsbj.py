@@ -245,7 +245,96 @@ def SetMic(state):
         natlink.setMicState(state)
     except :
         pass
+
+### grammar_log should be moved to natlinkcore
+import logging
+from logging import Logger
+
+
+class StaticProperty:
+    """A custom descriptor that allows  access as a static property."""
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, instance, owner):
+        return self.func()
+
+def grammar_log(name : str,alias : str):
+    """Adds to a grammar Class:  
+        logger_name:  The name of a logger.
+        logger_alias:  An alias of the logger, to be used with voice commands.
+        Logging methods.  """
+    print("Decorating")
+    def decorator(cls):
+      
+        @property 
+        def logger_name(self) -> str:
+            return self._logger_name
+        
+        @property 
+        def logger_alias(self) ->str:
+            return self._logger_alias
+
+        @property
+        def logger(self) -> logging.Logger: 
+            return logging.getLogger(self.logger_name)
+
+        #add class properties as well.
+        cls.class_logger_name  = name
+        cls.class_logger_alias = alias
+
+        @StaticProperty
+        def class_logger() -> logging.Logger:
+            return logging.getLogger(name)
+
+        cls.class_logger=class_logger
+    
+        #add those properties to the class
+        cls.logger_name=logger_name
+        cls.logger_alias=logger_alias
+        cls.logger=logger
+
+
+        #avoid copy and pasting methods that delegate to the logger.  
+        def delegate_to_logger(method):
+            """Delegates to {method} of a Logger object from self.getLogger()"""
+            def fn(self,*args,**kwargs):
+                logger=self.logger
+                try:
+                    return method(logger,*args,**kwargs)
+                except Exception as e:
+                    print("Failure attempting to call {method} on {logger}, \nargs {args} \nkwargs {kwargs}\nException:\n{e}")
+                    return False
+            return fn
+        #add methods to delegate calls to logger, so we have info, warn, etc. 
+        #this would be the better way to do it, but we haven't found a way to get code completion
+        #wrapped_logger=[Logger.info,Logger.setLevel,Logger.debug,Logger.warning,Logger.error,Logger.exception,Logger.critical,Logger.log]
+        #for n in wrapped_logger:     
+        #    locals()[n.__name__]=wrapped_log(n)
+        #instead, copy and paste. 
+        
+
+        cls.info=delegate_to_logger(Logger.info)
+        cls.setLevel=delegate_to_logger(Logger.setLevel)
+        cls.debug=delegate_to_logger(Logger.debug)
+        cls.warning=delegate_to_logger(Logger.warning)
+        cls.error=delegate_to_logger(Logger.error)
+        cls.exception=delegate_to_logger(Logger.exception)
+        cls.critical=delegate_to_logger(Logger.critical)
+        cls.log=delegate_to_logger(Logger.log)
+
+        #initialize default values
+        def __init__(self,*args,**kwargs):
+            self._logger_name   = name
+            self._logger_alias  = alias
+            super(cls,self).__init__(*args,**kwargs)
+        cls.__init__ = __init__
+        return cls
+    return decorator
+
+
 # GrammarX
+
 
 GrammarXAncestor=natlinkutils.GrammarBase
 class GrammarX(GrammarXAncestor):
@@ -284,52 +373,7 @@ class GrammarX(GrammarXAncestor):
         self.want_on_or_off = None   # True: on False: off None: no decision
         self.hypothesis = 0
         self.allResults = 0
-
-
-    def loggerName(self) ->str:
-        """Returns the name of a logger. Replace this and loggerShortName to create a logger for an inherited grammar. """
-        return logname()
-
-    def loggerShortName(self) ->str:
-        """A key for use as a  spoken form or user interface item."""
-        return "unimacro"
-
-    def getLogger(self) -> logging.Logger: 
-        return logging.getLogger(self.loggerName())
-
-
-
-    # TODO Doug, I can understand this a bit, but is it ok? It seems to stop Dragon... QH
-    #avoid copy and pasting methods that delegate to getLoger()
-    def wrapped_log(method):
-        """Delegates to {method} of a Logger object from self.getLogger()"""
-        def fn(self,*args,**kwargs):
-            logger=self.getLogger()
-            try:
-                return method(logger,*args,**kwargs)
-            except Exception as e:
-                print("Failure attempting to call {method} on {logger}, \nargs {args} \nkwargs {kwargs}\nException:\n{e}")
-                return False
-
-        return fn
-     
-    #add methods to delegate calls to logger, so we wave info, warn, etc. 
-    #this would be the better way to do it, but we haven't found a way to get code completion
-    #wrapped_logger=[Logger.info,Logger.setLevel,Logger.debug,Logger.warning,Logger.error,Logger.exception,Logger.critical,Logger.log]
-    #for n in wrapped_logger:     
-    #    locals()[n.__name__]=wrapped_log(n)
-    #instead, copy and paste. 
-    
-
-    info=wrapped_log(Logger.info)
-    setLevel=wrapped_log(Logger.setLevel)
-    debug=wrapped_log(Logger.debug)
-    warning=wrapped_log(Logger.warning)
-    error=wrapped_log(Logger.error)
-    exception=wrapped_log(Logger.exception)
-    critical=wrapped_log(Logger.critical)
-    log=wrapped_log(Logger.log)
-    
+   
     def getExclusiveGrammars(self):
         """return the dict of (name, grammarobject) of GrammarX objects that are exclusive
         """

@@ -1,0 +1,1 @@
+from unimacro.natlinkutilsbj import grammar_log
