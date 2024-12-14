@@ -52,13 +52,92 @@ from dtactions.unimacroactions import doAction as action
 from dtactions.sendkeys import sendkeys as keystroke
 from dtactions import unimacroactions as actions
 
+from icecream import ic 
+from logging import debug
+#ic.configureOutput(outputFunction=debug)
 class LinesError(Exception):
     pass
 
 counts = list(range(1,20)) + list(range(20,50,5)) + list(range(50,100,10)) + list(range(100, 1001, 100))
 #print 'counts: %s'% counts
+import logging
+from logging import Logger
+def grammar_log(name : str,alias : str):
+    """Adds to a grammar Class:  
+        logger_name:  The name of a logger.
+        logger_alias:  An alias of the logger, to be used with voice commands.
+        Logging methods.  """
+    print("Decorating")
+    def decorator(cls):
+      
+        @property 
+        def logger_name(self) -> str:
+            return self._logger_name
+        
+        @property 
+        def logger_alias(self) ->str:
+            return self._logger_alias
 
+        @property
+        def logger(self) -> logging.Logger: 
+            return logging.getLogger(self.logger_name)
+        
+        #add those properties to the class
+        cls.logger_name=logger_name
+        cls.logger_alias=logger_alias
+        cls.logger=logger
+
+        #avoid copy and pasting methods that delegate to the logger.  
+        def delegate_to_logger(method):
+            """Delegates to {method} of a Logger object from self.getLogger()"""
+            def fn(self,*args,**kwargs):
+                logger=self.logger
+                try:
+                    return method(logger,*args,**kwargs)
+                except Exception as e:
+                    print("Failure attempting to call {method} on {logger}, \nargs {args} \nkwargs {kwargs}\nException:\n{e}")
+                    return False
+            return fn
+        #add methods to delegate calls to logger, so we wave info, warn, etc. 
+        #this would be the better way to do it, but we haven't found a way to get code completion
+        #wrapped_logger=[Logger.info,Logger.setLevel,Logger.debug,Logger.warning,Logger.error,Logger.exception,Logger.critical,Logger.log]
+        #for n in wrapped_logger:     
+        #    locals()[n.__name__]=wrapped_log(n)
+        #instead, copy and paste. 
+        
+
+        cls.info=delegate_to_logger(Logger.info)
+        cls.setLevel=delegate_to_logger(Logger.setLevel)
+        cls.debug=delegate_to_logger(Logger.debug)
+        cls.warning=delegate_to_logger(Logger.warning)
+        cls.error=delegate_to_logger(Logger.error)
+        cls.exception=delegate_to_logger(Logger.exception)
+        cls.critical=delegate_to_logger(Logger.critical)
+        cls.log=delegate_to_logger(Logger.log)
+
+        #initialize default values
+        def __init__(self,*args,**kwargs):
+            super(cls,self).__init__(*args,**kwargs)
+            self._logger_name   = name
+            self._logger_alias  = alias
+        cls.__init__ = __init__
+        return cls
+    return decorator
+
+class GrammarLoggerMetaclass(type):
+    print(f"LoggingGrammar: Name {__name__} Module: {__module__}   qualname {__qualname__}   ")
+    pass
+    def __new__(cls, name, bases, attrs,logger_name="natlink.grammar",logger_short_name="grammar"):
+
+        ic(logger_name)
+        ic(logger_short_name)
+        attrs['xlogger_name'] = logger_name
+        attrs['xlogger_short_name'] = logger_name
+        return super().__new__(cls,name,bases,attrs)
+
+ 
 ancestor = natbj.DocstringGrammar
+@grammar_log("unimacro.lines","lines")
 class ThisGrammar(ancestor):
     language = unimacroutils.getLanguage()        
     iniIgnoreGrammarLists = ['count', 'taskcount', 'taskapplication'] # are set in this module

@@ -58,11 +58,11 @@ class ThisGrammar(ancestor):
 
     @staticmethod
     def static_logger_name():
-        return __name__
+        return __name__.replace("._","")
 
     @staticmethod   
     def static_logger_short_name():
-        return logger_name().split('.')[-1]
+        return static_logger_name().split('.')[-1]
     
     logger = getLogger(static_logger_name())
 
