@@ -99,7 +99,6 @@ def natlink_loggers() ->dict:
     return loggers
 
 ancestor = natbj.IniGrammar
-@grammar_log("unimacro.control","control")
 class UtilGrammar(ancestor):
     language = status.get_language()
     

@@ -106,7 +106,6 @@ ancestor = natbj.IniGrammar
 
 
 
-@grammar_log("unimacro.folders","folders")
 class ThisGrammar(ancestor):
     """grammar for quickly going to folders, files and websites
     """

@@ -47,7 +47,6 @@ language = unimacroutils.getLanguage()
 
 
 ancestor = natbj.IniGrammar
-@grammar_log("unimacro.grammars.clickbyvoice","clickbyvoice")
 class ThisGrammar(ancestor):
 
     @classmethod

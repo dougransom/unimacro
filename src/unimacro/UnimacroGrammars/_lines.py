@@ -64,7 +64,6 @@ counts = list(range(1,20)) + list(range(20,50,5)) + list(range(50,100,10)) + lis
 
 
 ancestor = natbj.DocstringGrammar
-@grammar_log("unimacro.lines","lines")
 class ThisGrammar(ancestor):
     language = unimacroutils.getLanguage()        
     iniIgnoreGrammarLists = ['count', 'taskcount', 'taskapplication'] # are set in this module
