@@ -336,8 +336,9 @@ def grammar_log(name : str,alias : str):
 # GrammarX
 
 
+
 GrammarXAncestor=natlinkutils.GrammarBase
-class GrammarX(GrammarXAncestor):
+class GrammarX(GrammarXAncestor,Logger):
     """first subclass of GrammarBase
 
       This is BJ's basic grammar class (Bart Jan van Os).
@@ -358,8 +359,27 @@ class GrammarX(GrammarXAncestor):
     GrammarsChanged = set()   # take last item just True!
     LoadedControlGrammars = set()
 
+    #avoid copy and pasting methods that delegate to the logger.  
+    def _delegate_to_logger(method):
+        """Delegates to {method} of a Logger object from self.logger_name()"""
+        def fn(self,*args,**kwargs):
+            logger=self.logger_name()
+            try:
+                return method(logger,*args,**kwargs)
+            except Exception as e:
+                print("Failure attempting to call {method} on {logger}, \nargs {args} \nkwargs {kwargs}\nException:\n{e}")
+                return False
+        return fn
+   
+    _to_delegate=[Logger.info,Logger.setLevel,Logger.debug,Logger.warning,Logger.error,Logger.exception,
+                  Logger.critical,Logger.log]
 
     def __init__(self):
+
+        for logging_func in self._to_delegate:
+                self[logging_func.__name__]= self.delegate_to_logger(logging_func)
+
+    
         self.__inherited.__init__(self)
         # set in list of allUnimacroGrammars, also when not loaded into
         self.RegisterGrammarObject()
@@ -540,6 +560,13 @@ class GrammarX(GrammarXAncestor):
 
     def getName(self):
         return self.name
+    
+    def logger_name(self):
+        """
+            A unimacro grammar should provide a logger name.  The default is the module
+            name, overiride logger_name for other behavior (like a special string or a __class__ etc.)
+        """
+        return self.__module__  #this will pick up the module the subclass instance was created.
 
     GetName = getName   # consistency with Bart Jan
 
@@ -1079,7 +1106,9 @@ class BrowsableGrammar(BrowsableGrammarAncestor):
 ##
 IniGrammarAncestor=BrowsableGrammar    
 class IniGrammar(IniGrammarAncestor):
-    """grammar base which has methods for inifile stuff
+    """grammar base which has methods for inifile stuff.
+    Grammars that derive from this have name set automatically to the module name removing any 
+    leading '_' characters.
 
     """
     #pylint:disable=R0902, R0904

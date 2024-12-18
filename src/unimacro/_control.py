@@ -34,6 +34,7 @@ from unimacro import natlinkutilsbj as natbj
 from unimacro.natlinkutilsbj import grammar_log
 from unimacro import spokenforms 
 from unimacro import __version__ as unimacro_version
+from icecream import ic
 #from unimacro.logger import ulogger
 
 
@@ -102,10 +103,7 @@ ancestor = natbj.IniGrammar
 class UtilGrammar(ancestor):
     language = status.get_language()
     
-    loggers=natlink_loggers()
-    loggers_names=sorted(loggers.keys())
-    
-    ulogger.debug("Control:  Available Loggers %s", loggers_names)
+
     iniIgnoreGrammarLists = ['gramnames', 'tracecount', 'message', 'logger_names'] # are set in this module
 
     name = 'control'
@@ -155,12 +153,11 @@ class UtilGrammar(ancestor):
     Repeat = 0
 
     def initialize(self):
+        self.logger.setLevel(l.DEBUG)
         # temp set allResults to 0, disabling the messages trick:
         if not self.load(self.gramSpec, allResults=showAll):
             return
         
-        print(f'loggers_names: {self.loggers_names}')
-        self.setList('logmodulename',self.loggers_names)
         self.RegisterControlObject(self)
         self.emptyList('message')
         # at post load
@@ -418,6 +415,7 @@ class UtilGrammar(ancestor):
 ##        self.exclusive = state
 
     def gotResults_show(self,words,fullResults):
+        self.debug(f"gotResults_show words: {words} full results: {fullResults}")
         # special case for actions:
         if self.hasCommon(words, 'actions'):
             actions.showActions(comingFrom=self, name="show actions")
@@ -432,7 +430,15 @@ class UtilGrammar(ancestor):
             self.gotResults_showexclusive(words, fullResults)
             return
         if self.hasCommon(words,"loggers"):
-            self.info(f"Available Loggers: {self.loggers}")
+            self.debug("has common words Loggers")
+            grammars = self.getUnimacroGrammars()
+            for g in grammars:
+                self.debug(f"{g}  hasattr 'logger' {hasattr(g,'logger')}  hasattr fu {hasattr(g,'fu')} active {hasattr(g,'isActive')}  \n{g} type {type(g)} ")
+            gramNames = list(grammars.keys())
+            grammars_with_loggers = filter( lambda g: hasattr(g,"logger"), grammars )
+            l=list(grammars_with_loggers)
+            self.info(f"Grammars {gramNames} \nLoggers  {l}")
+            return
             L = ['\nAvailable Loggers apart from the root (natlink) logger:']
             for key, loggerid in self.loggers.items():
                 logger=l.getLogger(loggerid)
