@@ -557,13 +557,16 @@ class GrammarX(GrammarXAncestor,Logger):
     # This is a utility function.  It calls a member function if and only
     # if that member function is defined.
 
+    #a subclass of GrammarX must have a name property.
+ 
+
     def getName(self):
         return self.name
     
     def logger_name(self):
         """
             A unimacro grammar should provide a logger name.  The default is the module
-            name, overiride logger_name for other behavior (like a special string or a __class__ etc.)
+            name, override logger_name for other behavior (like a special string or a __class__ etc.)
         """
         return self.__module__  #this will pick up the module the subclass instance was created.
 

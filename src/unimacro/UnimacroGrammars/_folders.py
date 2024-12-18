@@ -2197,7 +2197,7 @@ def our_print(*args,**kwargs):
     f=StringIO()
     builtin_print(args,kwargs,file=f)
     value=f.getvalue()
-    ThisGrammar.logger.debug("print called instead of logging functions: %s", value)
+    builtin_print("unimacro print: %s", value)
     ThisGrammar.error(value)
 print=our_print
 
