@@ -360,7 +360,7 @@ class GrammarX(GrammarXAncestor,Logger):
     LoadedControlGrammars = set()
 
     #avoid copy and pasting methods that delegate to the logger.  
-    def _delegate_to_logger(method):
+    def _delegate_to_logger(self,method):
         """Delegates to {method} of a Logger object from self.logger_name()"""
         def fn(self,*args,**kwargs):
             logger=self.logger_name()
@@ -375,11 +375,10 @@ class GrammarX(GrammarXAncestor,Logger):
                   Logger.critical,Logger.log]
 
     def __init__(self):
-
+        #delegate some of the logging functions.
         for logging_func in self._to_delegate:
-                self[logging_func.__name__]= self.delegate_to_logger(logging_func)
-
-    
+                setattr(self, logging_func.__name__, self._delegate_to_logger(logging_func))
+                
         self.__inherited.__init__(self)
         # set in list of allUnimacroGrammars, also when not loaded into
         self.RegisterGrammarObject()
