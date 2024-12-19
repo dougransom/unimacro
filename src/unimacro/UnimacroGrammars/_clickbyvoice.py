@@ -29,13 +29,15 @@ in the foreground
 """
 import natlink
 from unimacro import natlinkutilsbj as natbj
-grammar_log = natbj.grammar_log
 
 from dtactions import unimacroutils
 from dtactions.unimacroactions import doAction as action
 from dtactions.unimacroactions import doKeystroke  as keystroke
 from logging import getLogger
+import unimacro
+
 from io import StringIO
+logger = unimacro.logger()
 # use extension Click by Voice
 visiblePause = 0.4
 
@@ -341,7 +343,7 @@ class ThisGrammar(ancestor):
         # not in inifile:
         self.hideNumbers = ":-"
 
-logger=ThisGrammar.class_logger
+
 #logger should be used instead of print
 #replace print to avoid unintended use.
 builtin_print=print

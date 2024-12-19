@@ -20,6 +20,7 @@ import string
 from pathlib import Path
 #a global logger for unimacro.  perfectly reasonable to access by name instead.
 import logging as l
+from logging import Logger
 import importlib.metadata as meta
 import sys
 
@@ -31,7 +32,6 @@ from dtactions import unimacroutils
 from dtactions import unimacroactions as actions
 
 from unimacro import natlinkutilsbj as natbj
-from unimacro.natlinkutilsbj import grammar_log
 from unimacro import spokenforms 
 from unimacro import __version__ as unimacro_version
 from icecream import ic
@@ -431,21 +431,8 @@ class UtilGrammar(ancestor):
         if self.hasCommon(words,"loggers"):
             self.debug("has common words Loggers")
             grammars = self.getUnimacroGrammars()
-            for g in grammars:
-                self.debug(f"{g}  hasattr 'logger' {hasattr(g,'logger')}  hasattr fu {hasattr(g,'fu')} active {hasattr(g,'isActive')}  \n{g} type {type(g)} ")
-            gramNames = list(grammars.keys())
-            grammars_with_loggers = filter( lambda g: hasattr(g,"logger"), grammars )
-            l=list(grammars_with_loggers)
-            self.info(f"Grammars {gramNames} \nLoggers  {l}")
-            return
-            L = ['\nAvailable Loggers apart from the root (natlink) logger:']
-            for key, loggerid in self.loggers.items():
-                logger=l.getLogger(loggerid)
-                level = logger.getEffectiveLevel()
-                levelname = l.getLevelName(level)
-                L.append(f'-- {key}: {loggerid}, loglevel: {levelname}')
-            L.append('The individual loglevels can be changed with "name loglevel (debug|info|warning|error|critical)" \n')
-            self.message('\n'.join(L))
+            msg="\n".join([f'-- {g.getName()}: {g.logger_name()}, loglevel: {l.getLevelName(l.getLogger(g.logger_name()).getEffectiveLevel())}' for _, g in grammars])
+            self.message(msg)
             return
 
 

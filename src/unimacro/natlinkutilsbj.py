@@ -71,6 +71,8 @@ from unimacro import D_
 
 from unimacro import spokenforms # for numbers spoken forms, IniGrammar (and also then DocstringGrammar)
 from unimacro import logname
+import types
+
 status = natlinkstatus.NatlinkStatus()
 natlinkmain = loader.NatlinkMain()
 
@@ -259,82 +261,20 @@ class StaticProperty:
     def __get__(self, instance, owner):
         return self.func()
 
-def grammar_log(name : str,alias : str):
-    """Adds to a grammar Class:  
-        logger_name:  The name of a logger.
-        logger_alias:  An alias of the logger, to be used with voice commands.
-        Logging methods.  """
-    print("Decorating")
-    def decorator(cls):
-      
-        @property 
-        def logger_name(self) -> str:
-            return self._logger_name
-        
-        @property 
-        def logger_alias(self) ->str:
-            return self._logger_alias
-
-        @property
-        def logger(self) -> logging.Logger: 
-            return logging.getLogger(self.logger_name)
-
-        #add class properties as well.
-        cls.class_logger_name  = name
-        cls.class_logger_alias = alias
-
-        @StaticProperty
-        def class_logger() -> logging.Logger:
-            return logging.getLogger(name)
-
-        cls.class_logger=class_logger
-    
-        #add those properties to the class
-        cls.logger_name=logger_name
-        cls.logger_alias=logger_alias
-        cls.logger=logger
 
 
-        #avoid copy and pasting methods that delegate to the logger.  
-        def delegate_to_logger(method):
-            """Delegates to {method} of a Logger object from self.getLogger()"""
-            def fn(self,*args,**kwargs):
-                logger=self.logger
-                try:
-                    return method(logger,*args,**kwargs)
-                except Exception as e:
-                    print("Failure attempting to call {method} on {logger}, \nargs {args} \nkwargs {kwargs}\nException:\n{e}")
-                    return False
-            return fn
-        #add methods to delegate calls to logger, so we have info, warn, etc. 
-        #this would be the better way to do it, but we haven't found a way to get code completion
-        #wrapped_logger=[Logger.info,Logger.setLevel,Logger.debug,Logger.warning,Logger.error,Logger.exception,Logger.critical,Logger.log]
-        #for n in wrapped_logger:     
-        #    locals()[n.__name__]=wrapped_log(n)
-        #instead, copy and paste. 
-        
-
-        cls.info=delegate_to_logger(Logger.info)
-        cls.setLevel=delegate_to_logger(Logger.setLevel)
-        cls.debug=delegate_to_logger(Logger.debug)
-        cls.warning=delegate_to_logger(Logger.warning)
-        cls.error=delegate_to_logger(Logger.error)
-        cls.exception=delegate_to_logger(Logger.exception)
-        cls.critical=delegate_to_logger(Logger.critical)
-        cls.log=delegate_to_logger(Logger.log)
-
-        #initialize default values
-        def __init__(self,*args,**kwargs):
-            self._logger_name   = name
-            self._logger_alias  = alias
-            super(cls,self).__init__(*args,**kwargs)
-        cls.__init__ = __init__
-        return cls
-    return decorator
-
-
-# GrammarX
-
+#avoid copy and pasting methods that delegate to the logger.  
+def _delegate_to_logger(method_name):
+    """Delegates to {method} of a Logger object from self.logger_name()"""
+    def fn(self,*args,**kwargs):
+        logger=logging.getLogger(self.logger_name())
+        method = getattr(logger,method_name)
+        try:
+            return method(logger,*args,**kwargs)
+        except Exception as e:
+            print("Failure attempting to call {method} on {logger}, \nargs {args} \nkwargs {kwargs}\nException:\n{e}")
+            return False
+    return fn
 
 
 GrammarXAncestor=natlinkutils.GrammarBase
@@ -359,26 +299,21 @@ class GrammarX(GrammarXAncestor,Logger):
     GrammarsChanged = set()   # take last item just True!
     LoadedControlGrammars = set()
 
-    #avoid copy and pasting methods that delegate to the logger.  
-    def _delegate_to_logger(self,method):
-        """Delegates to {method} of a Logger object from self.logger_name()"""
-        def fn(self,*args,**kwargs):
-            logger=self.logger_name()
-            try:
-                return method(logger,*args,**kwargs)
-            except Exception as e:
-                print("Failure attempting to call {method} on {logger}, \nargs {args} \nkwargs {kwargs}\nException:\n{e}")
-                return False
-        return fn
-   
-    _to_delegate=[Logger.info,Logger.setLevel,Logger.debug,Logger.warning,Logger.error,Logger.exception,
-                  Logger.critical,Logger.log]
-
+    
+ 
     def __init__(self):
         #delegate some of the logging functions.
-        for logging_func in self._to_delegate:
-                setattr(self, logging_func.__name__, self._delegate_to_logger(logging_func))
-                
+    
+        #copy and paste do we get hints
+        self.info=types.MethodType(_delegate_to_logger("info"),self)
+        self.setLevel=types.MethodType(_delegate_to_logger("setLevel"),self)
+        self.debug=types.MethodType(_delegate_to_logger("debug"),self)
+        self.warning=types.MethodType(_delegate_to_logger("warning"),self)
+        self.error=types.MethodType(_delegate_to_logger("error"),self)
+        self.exception=types.MethodType(_delegate_to_logger("exception"),self)
+        self.critical=types.MethodType(_delegate_to_logger("critical"),self)
+        self.log=types.MethodType(_delegate_to_logger("log"),self)
+
         self.__inherited.__init__(self)
         # set in list of allUnimacroGrammars, also when not loaded into
         self.RegisterGrammarObject()

@@ -72,9 +72,10 @@ from dtactions import unimacroutils
 # from dtactions.unimacroactions import Message
 # from dtactions import unimacroactions as actions
 from unimacro import natlinkutilsbj as natbj
-from unimacro.natlinkutilsbj import grammar_log
+
 # from unimacro.unimacro_wxpythondialogs import InputBox
 # import natlinkcore.natlinkutils as natut
+from unimacro import logger  #default for when we don't have an instance.
 
 # manipulating file names with env variables etc...
 envvars = extenvvars.ExtEnvVars()
@@ -2189,8 +2190,7 @@ class ThisGrammar(ancestor):
 
         """       
 
-logger = ThisGrammar.class_logger
-#logger should be used instead of print
+
 #replace print to avoid unintended use.
 builtin_print=print
 def our_print(*args,**kwargs):
