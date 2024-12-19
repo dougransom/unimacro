@@ -35,21 +35,25 @@ from unimacro import natlinkutilsbj as natbj
 from unimacro import spokenforms 
 from unimacro import __version__ as unimacro_version
 from icecream import ic
+
+logger = Logger("_control")
+#from unimacro import logger
 #from unimacro.logger import ulogger
 
 
 #for some reason, importing amodule which does this doesn't work.  Likely because natlinkmain must be started first for
 #this sublogger natlink.unimacro to work correctly.
-import unimacro as unimacro_l   #bring in so we can add a variable ulogger to the namespace.  
-ulogger : l.Logger = l.getLogger(unimacro_l.logname()) 
+#import unimacro as unimacro_l   #bring in so we can add a variable ulogger to the namespace.  
+#ulogger : l.Logger = l.getLogger(unimacro_l.logname()) 
 #Loggers can be created for any module, and they can propogate to the parent  Logger, or not.
 #As an example, this module for the control grammar has its own child logger of unimacro.
 #Note an entry point has to be defined as well, in pyproject.toml, so Loggers for various natlink components can be discovered.
 
 
 
-unimacro_l.__dict__['ulogger']=ulogger
-ulogger.debug("natlink.unimacro logger available")
+#unimacro_l.__dict__['ulogger']=ulogger
+#ulogger.debug("natlink.unimacro logger available")
+
 status = natlinkstatus.NatlinkStatus()
 natlinkmain = loader.NatlinkMain()
 thisDir = str(Path(__file__).parent)
@@ -69,34 +73,6 @@ Normal=0
 # 
 showAll = 1  # reset if no echo of exclusive commands is wished
 
-def natlink_loggers() ->dict:
-    """ 
-        returns dictionary, keys are the names of the module to show to users (or for them to use in dication), 
-        values are the string names of the loggers.
-        For example, {'unimacro':'natlink.unimacro'}.
-        Any python module/package/etc. can enable their own logger by defining an entry point in group 'natlink.loggers'.  
-        The entry point must be a function that returns a logger name.  Is the Python 'logging' module.
-
-    """
-    discovered_eps=meta.entry_points(group='dt.loggers')
-    ulogger.debug('Entry Points for natlink.loggers: %s', discovered_eps)
-    loggers = dict()
-    for ep in discovered_eps:
-        try:
-            name=ep.name
-            module=ep.module
-            module_loaded=module in sys.modules
-
-            ulogger.debug(f"Entry Point {ep} module: {module}  is loaded:  {module_loaded}.  {'' if module_loaded else 'Not adding to list of available loggers.'} ")
-
-            #only add the logger to the list of available loggers if the module is already loaded.
-            if module_loaded:              
-                f=ep.load()
-                logname=f()
-                loggers[name]=logname
-        except Exception as e:
-            ulogger.error(f"Attempting to load EntryPoint {ep},error\n {e}")
-    return loggers
 
 ancestor = natbj.IniGrammar
 class UtilGrammar(ancestor):
@@ -117,7 +93,7 @@ class UtilGrammar(ancestor):
     specialList.append("loggers")
     if specialList:
         specials = "|" + '|'.join(specialList)
-        ulogger.debug('specialList for "show": %s', specials)
+        logger.debug('specialList for "show": %s', specials)
     else:
         specials = ""
     
@@ -152,7 +128,7 @@ class UtilGrammar(ancestor):
     Repeat = 0
 
     def initialize(self):
-        self.logger.setLevel(l.DEBUG)
+        self.setLevel(l.DEBUG)
         # temp set allResults to 0, disabling the messages trick:
         if not self.load(self.gramSpec, allResults=showAll):
             return
@@ -343,8 +319,8 @@ class UtilGrammar(ancestor):
         new_log_level = l.__dict__[new_log_level_str]
 
         self.info(f"New Log Level {new_log_level_str} for logger {logger_name}")
-        logger=l.getLogger(logger_name)
-        logger.setLevel(new_log_level)
+        t_logger=l.getLogger(logger_name)
+        t_logger.setLevel(new_log_level)
 
     # def gotResults_loglevel(self,words,fullresults):
     #     """
@@ -431,7 +407,9 @@ class UtilGrammar(ancestor):
         if self.hasCommon(words,"loggers"):
             self.debug("has common words Loggers")
             grammars = self.getUnimacroGrammars()
-            msg="\n".join([f'-- {g.getName()}: {g.logger_name()}, loglevel: {l.getLevelName(l.getLogger(g.logger_name()).getEffectiveLevel())}' for _, g in grammars])
+
+            msg="\n".join([f'-- {g.getName()}: {g.logger_name()}, loglevel: {l.getLevelName(l.getLogger(g.logger_name()).getEffectiveLevel())}' 
+                           for _,g in grammars.items()])
             self.message(msg)
             return
 

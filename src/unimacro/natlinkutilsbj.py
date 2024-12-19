@@ -267,10 +267,13 @@ class StaticProperty:
 def _delegate_to_logger(method_name):
     """Delegates to {method} of a Logger object from self.logger_name()"""
     def fn(self,*args,**kwargs):
+        print(f"in function {fn} args {args} kwargs {kwargs} method_name {method_name}")
         logger=logging.getLogger(self.logger_name())
+        print(f"Logger : {logger}")
         method = getattr(logger,method_name)
+        print(f"method: {method}")
         try:
-            return method(logger,*args,**kwargs)
+            return method(*args,**kwargs)
         except Exception as e:
             print("Failure attempting to call {method} on {logger}, \nargs {args} \nkwargs {kwargs}\nException:\n{e}")
             return False
