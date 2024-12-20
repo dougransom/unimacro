@@ -277,7 +277,7 @@ def _delegate_to_logger(method_name):
 
 
 GrammarXAncestor=natlinkutils.GrammarBase
-class GrammarX(GrammarXAncestor,Logger):
+class GrammarX(GrammarXAncestor):
     """first subclass of GrammarBase
 
       This is BJ's basic grammar class (Bart Jan van Os).
@@ -304,7 +304,9 @@ class GrammarX(GrammarXAncestor,Logger):
         #delegate some of the logging functions.
     
         #copy and paste do we get hints
-        self.info=types.MethodType(_delegate_to_logger("info"),self)
+        #There may be a better way using decorators.
+        
+        self.info=types.MethodType(_delegate_to_logger("info"),self)  
         self.setLevel=types.MethodType(_delegate_to_logger("setLevel"),self)
         self.debug=types.MethodType(_delegate_to_logger("debug"),self)
         self.warning=types.MethodType(_delegate_to_logger("warning"),self)
@@ -491,8 +493,7 @@ class GrammarX(GrammarXAncestor,Logger):
     # This is a utility function.  It calls a member function if and only
     # if that member function is defined.
 
-    #a subclass of GrammarX must have a name property.
- 
+
 
     def getName(self):
         return self.name
