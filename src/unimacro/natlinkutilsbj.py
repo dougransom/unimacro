@@ -72,6 +72,7 @@ from unimacro import D_
 from unimacro import spokenforms # for numbers spoken forms, IniGrammar (and also then DocstringGrammar)
 from unimacro import logname
 import types
+from functools import wraps
 
 status = natlinkstatus.NatlinkStatus()
 natlinkmain = loader.NatlinkMain()
@@ -248,9 +249,8 @@ def SetMic(state):
     except :
         pass
 
-### grammar_log should be moved to natlinkcore
-import logging
-from logging import Logger
+ 
+
 
 
 class StaticProperty:
@@ -298,22 +298,29 @@ class GrammarX(GrammarXAncestor):
     GrammarsChanged = set()   # take last item just True!
     LoadedControlGrammars = set()
 
-    
- 
-    def __init__(self):
+
+    def __new__(cls):
+        
         #delegate some of the logging functions.
     
         #copy and paste do we get hints
         #There may be a better way using decorators.
+
+        obj = super().__new__(cls)
+
+
+        obj.info=types.MethodType(_delegate_to_logger("info"),obj)  
+        obj.setLevel=types.MethodType(_delegate_to_logger("setLevel"),obj)
+        obj.debug=types.MethodType(_delegate_to_logger("debug"),obj)
+        obj.warning=types.MethodType(_delegate_to_logger("warning"),obj)
+        obj.error=types.MethodType(_delegate_to_logger("error"),obj)
+        obj.exception=types.MethodType(_delegate_to_logger("exception"),obj)
+        obj.critical=types.MethodType(_delegate_to_logger("critical"),obj)
+        obj.log=types.MethodType(_delegate_to_logger("log"),obj)
+        return obj
+    
+    def __init__(self):
         
-        self.info=types.MethodType(_delegate_to_logger("info"),self)  
-        self.setLevel=types.MethodType(_delegate_to_logger("setLevel"),self)
-        self.debug=types.MethodType(_delegate_to_logger("debug"),self)
-        self.warning=types.MethodType(_delegate_to_logger("warning"),self)
-        self.error=types.MethodType(_delegate_to_logger("error"),self)
-        self.exception=types.MethodType(_delegate_to_logger("exception"),self)
-        self.critical=types.MethodType(_delegate_to_logger("critical"),self)
-        self.log=types.MethodType(_delegate_to_logger("log"),self)
 
         self.__inherited.__init__(self)
         # set in list of allUnimacroGrammars, also when not loaded into
@@ -445,11 +452,6 @@ class GrammarX(GrammarXAncestor):
         return self.__class__.__bases__[0] 
 
 
-
-
-
-
-
     def load(self,gramSpec,allResults=0,hypothesis=0, grammarName=None):
         
         if gramSpec:
@@ -496,6 +498,9 @@ class GrammarX(GrammarXAncestor):
 
 
     def getName(self):
+        """ 
+        A unimacroGrammar should have a name, returned by getName.  Default is to use a name property.  
+        """
         return self.name
     
     def logger_name(self):

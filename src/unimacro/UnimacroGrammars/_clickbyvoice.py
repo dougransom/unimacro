@@ -33,7 +33,6 @@ from unimacro import natlinkutilsbj as natbj
 from dtactions import unimacroutils
 from dtactions.unimacroactions import doAction as action
 from dtactions.unimacroactions import doKeystroke  as keystroke
-from logging import getLogger
 import unimacro
 
 from io import StringIO

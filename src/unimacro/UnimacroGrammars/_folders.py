@@ -1913,7 +1913,7 @@ class ThisGrammar(ancestor):
         try:
             classname = win32gui.GetClassName(hndle)
         except:
-            self.warning('Invalid hndle for GetClassName: {hndle}')
+            self.warning(f'Invalid hndle for GetClassName: {hndle}')
             classname = ''
         IamChild32770 = (not istop) and classname == '#32770'
 

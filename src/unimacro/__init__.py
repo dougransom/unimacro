@@ -5,8 +5,7 @@ Note there will be a global variable created in the unimacro module 'ulogger' wh
 You can always access it by name.  It is created in _control.py.
 
 """
-import os
-import sys
+
 from logging import Logger
 from logging import getLogger as __get_logger__
 import importlib.metadata

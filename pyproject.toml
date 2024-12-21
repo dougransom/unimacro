@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 [build-system]
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
@@ -57,10 +48,7 @@ dev = [
 unimacro_builtins = "unimacro.UnimacroGrammars:locateme"
 
 [project.entry-points."dt.loggers"]
-	unimacro ="unimacro:logname"
-	control="unimacro:control_logger_name"
-	folders="unimacro:folders_logger_name"
-	clickbyvoice="unimacro:clickbyvoice_logger_name"
+
 
 [tool.pytest.ini_options]
 minversion = "7.1.2"

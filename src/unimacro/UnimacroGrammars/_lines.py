@@ -46,7 +46,6 @@ For more information on this number part, see grammar _testnumbersspokenforms.py
 import natlink
 from natlinkcore import natlinkutils
 import unimacro.natlinkutilsbj as natbj
-from unimacro.natlinkutilsbj import grammar_log
 from dtactions import inivars
 from dtactions import unimacroutils
 from dtactions.unimacroactions import doAction as action
