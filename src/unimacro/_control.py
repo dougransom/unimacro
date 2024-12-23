@@ -597,6 +597,7 @@ class UtilGrammar(ancestor):
         if prevSet != newSet:
             # print(f'UnimacroControlPostLoad, setting new grammar names list: {list(newSet)}')
             self.setList('gramnames', list(newSet))
+            self.setList('logmodulename', list(newSet))
             
     def getUnimacroGrammarNamesPaths(self):
         """get the names of active or inactive, but loaded Unimacro grammars
