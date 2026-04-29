@@ -304,11 +304,11 @@ class GrammarX(GrammarXAncestor):
 
         obj.info=types.MethodType(_delegate_to_logger("info"),obj)
         # in use by thos c;ass amd subclasses (QH, 2026):
-        obj.infof=types.MethodType(_delegate_to_logger("info"),obj)  
         obj.setLevel=types.MethodType(_delegate_to_logger("setLevel"),obj)
         obj.debug=types.MethodType(_delegate_to_logger("debug"),obj)
         obj.warning=types.MethodType(_delegate_to_logger("warning"),obj)
         obj.error=types.MethodType(_delegate_to_logger("error"),obj)
+        obj.errorf=obj.error
         obj.exception=types.MethodType(_delegate_to_logger("exception"),obj)
         obj.critical=types.MethodType(_delegate_to_logger("critical"),obj)
         obj.log=types.MethodType(_delegate_to_logger("log"),obj)
