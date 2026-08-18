@@ -48,21 +48,18 @@ systrayHndle = 0
 
 status = natlinkstatus.NatlinkStatus()
 language = status.language
-FORMATS = {
-    # for letters (do nothing):
-    'no spacing': (uniutils.wf_NoSpaceFollowingThisWord | uniutils.wf_NoSpacePreceedingThisWord |
-                   uniutils.wf_TurnOffSpacingBetweenWords |
-                      uniutils.wf_DoNotApplyFormattingToThisWord
-          ),
-    # normal words:
-    'normal words': ( uniutils.wf_RestoreNormalCapitalization |
-            uniutils.wf_RestoreNormalSpacing
-          ),
-    # extra space(do one space):
-    'extra space':  ( uniutils.wf_RestoreNormalCapitalization |
-            uniutils.wf_RestoreNormalSpacing |
-            uniutils.wf_AddAnExtraSpaceFollowingThisWord
-          ), 
+FORMATS = \
+    {
+        # for letters (do nothing):
+        'no spacing': (uniutils.wf_NoSpaceFollowingThisWord | uniutils.wf_NoSpacePreceedingThisWord
+                       | uniutils.wf_TurnOffSpacingBetweenWords | uniutils.wf_DoNotApplyFormattingToThisWord
+                       ),
+        # normal words:
+        'normal words': (uniutils.wf_RestoreNormalCapitalization | uniutils.wf_RestoreNormalSpacing),
+        # extra space(do one space):
+        'extra space': (uniutils.wf_RestoreNormalCapitalization | uniutils.wf_RestoreNormalSpacing |
+                        uniutils.wf_AddAnExtraSpaceFollowingThisWord
+                        ),
     }
 
 user = status.user
@@ -110,7 +107,7 @@ class ThisGrammar(ancestor):
 
     iniIgnoreGrammarLists = ['modes', 'count', 'namelist', 'character', 'punctuation']
 
-    language = uniutils.getLanguage()        
+    language = uniutils.getLanguage()
 
     try:
         number_rules = natbj.numberGrammar[language]  # including millions
@@ -216,7 +213,7 @@ class ThisGrammar(ancestor):
         """
         n = self.getNumberFromSpoken(words[-1])
         t = uniutils.getClipboard()
-        print('(%s) %s'% (type(t), t))
+        print('(%s) %s' % (type(t), t))
         T = self.partsSplitSpecial(t)
         if n <= len(T):
             keystroke(T[n - 1])
@@ -231,7 +228,7 @@ class ThisGrammar(ancestor):
         """
         # n = self.getNumberFromSpoken(words[-1])
         t = uniutils.getClipboard()
-        print('(%s) %s'% (type(t), t))
+        print('(%s) %s' % (type(t), t))
         T = self.partsSplitSpecial(t)
         print('put item by item %s words' % len(T))
         for t in T:
@@ -306,7 +303,7 @@ class ThisGrammar(ancestor):
         print("gotResults_dictate, words: %s, fullResults: %s" % (words, fullResults))
         self.dictate = 1
 
-    def gotResults_dgnletters(self,words,fullResults):
+    def gotResults_dgnletters(self, words, fullResults):
         self.text = ''.join(map(uniutils.stripSpokenForm, words))
         if self.search:
             # catch some common misrecognitions:
@@ -349,16 +346,16 @@ class ThisGrammar(ancestor):
                 if char:
                     self.text += char
                 else:
-                    print('general: character or punctuation not found for spoken form: %s'% w)
+                    print('general: character or punctuation not found for spoken form: %s' % w)
 
     # def gotResults_dgnwords(self,words,fullResults):
     #     #self.text = ' '.join(map(uniutils.stripSpokenForm, words))
     #     # try with the improved nsformat function
     #     print(f'got dgnwords: {words}')
 
-    def gotResults_dgndictation(self,words,fullResults):
-        #self.text = ' '.join(map(uniutils.stripSpokenForm, words))
-        # try with the improved nsformat function 
+    def gotResults_dgndictation(self, words, fullResults):
+        # self.text = ' '.join(map(uniutils.stripSpokenForm, words))
+        # try with the improved nsformat function
         if self.gotPassword:
             print('gotPassword, analyse password: %s' % words)
             text = nsformat.formatPassword(words)
@@ -523,7 +520,7 @@ class ThisGrammar(ancestor):
         t5 = time.time()
         result = uniutils.getClipboard()
         t6 = time.time()
-        print('timing getPrevNext program: %s\nclear clipboard: %.4f, left: %.4f, shiftright2: %.4f, copy: %.4f, left: %.4f, getcl: %.4f' % (
+        print('timing getPrevNext: %s\nclear clipboard: %.4f, L: %.4f, shiftR2: %.4f, copy: %.4f, L: %.4f, getcl: %.4f' % (
             prog, t1 - t0, t2 - t1, t3 - t2, t4 - t3, t5 - t4, t6 - t5))
         if len(result) == 2:
             return result[0], result[1]
@@ -549,7 +546,7 @@ class ThisGrammar(ancestor):
         """
         T = []
         extra = []
-        if self.hasCommon(words,'window') or self.hasCommon(words,'prog'):
+        if self.hasCommon(words, 'window') or self.hasCommon(words, 'prog'):
             p = uniutils.getProgInfo()
             hndle = p.hndle
             T.append('---from uniutils.getProgInfo:')
@@ -628,14 +625,14 @@ class ThisGrammar(ancestor):
             return
         keystroke('{Shift+Ctrl+Left %s}' % c)
         keystroke('{ctrl+x}')
-        print('here comes the copy paste trick %s words'% c)
+        print('here comes the copy paste trick %s words' % c)
         uniutils.Wait(0.5)
         t = natlink.getClipboard()
         tList = t.split()
-        print('tList: %s'% tList)
+        print('tList: %s' % tList)
         uniutils.Wait(0.5)
-        funcName = 'format_%s'% vartrick
-        # print 'funcName: %s'% funcNameyour 
+        funcName = 'format_%s ' % vartrick
+        # print 'funcName: %s'% funcName
         try:
             func = getattr(self, funcName)
             # print 'func: %s' % func
@@ -754,8 +751,8 @@ class ThisGrammar(ancestor):
                 if self.language == 'nld':
                     com = "selecteer dat"
                 else:
-                    com  = "select that"
-                action("HW %s"%com)
+                    com = "select that"
+                action("HW %s" % com)
                 uniutils.Wait(0.5)
                 keystroke("{Ctrl+c}")
                 time.sleep(0.1)
@@ -772,8 +769,9 @@ class ThisGrammar(ancestor):
                 print(f'adding part: {r}')
                 uniutils.addWordIfNecessary(t)
             keystroke(r)
-        else: # zonder naam in words, a normal phrase:
-            print('adding phrase %s'% t)
+        else:
+            # zonder naam in words, a normal phrase:
+            print('adding phrase %s' % t)
             uniutils.addWordIfNecessary(t)
             keystroke(t)
         action("CLIPRESTORE")
@@ -793,8 +791,8 @@ class ThisGrammar(ancestor):
                 if self.language == 'nld':
                     com = "selecteer dat"
                 else:
-                    com  = "select that"
-                action("HW %s"%com)
+                    com = "select that"
+                action("HW %s" % com)
                 uniutils.Wait(0.5)
                 keystroke("{Ctrl+c}")
                 t = natlink.getClipboard().strip()
@@ -910,8 +908,8 @@ class ThisGrammar(ancestor):
                 self.DisplayMessage('search, invalid search code: %s' % self.search)
                 return
             if res == -2:
-            # search failed, did cancel mode
-                return 
+                # search failed, did cancel mode
+                return
             uniutils.visibleWait()
             print('calling stop search')
             self.stopSearch(progInfo=progInfo)
@@ -934,7 +932,7 @@ class ThisGrammar(ancestor):
             self.direc = self.getLastSearchDirection()  # in case back search changed it!
             if res == -2:
                 # search failed, did cancel mode
-                return 
+                return
         uniutils.visibleWait()
         if not searchGoOn:
             self.stopSearch(progInfo)
@@ -948,8 +946,8 @@ class ThisGrammar(ancestor):
 
     def Message(self, t):
         tt = t + "  (command: " + self.fullText + ")"
-        uniutils.Message(tt,self.title)
-        
+        uniutils.Message(tt, self.title)
+
     def do_pressfirst(self, text):
         """first character "hard", rest normal
         """
